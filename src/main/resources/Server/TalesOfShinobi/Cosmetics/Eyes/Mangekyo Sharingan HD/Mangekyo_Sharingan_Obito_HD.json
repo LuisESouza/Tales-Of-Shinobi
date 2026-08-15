@@ -1,0 +1,11 @@
+{
+  "Type": "EyeAttachment",
+  "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png",
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Mangekyo Sharingan HD/Mangekyo Sharingan HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Mangekyo Sharingan HD/Mangekyo Sharingan HD_Variant_Obito.png"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "Type": "EyeAttachment",
+  "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png",
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Sharingan HD/Sharingan HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Sharingan HD/Sharingan HD.png"
+    }
+  }
+}

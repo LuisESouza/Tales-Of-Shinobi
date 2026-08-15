@@ -1,0 +1,1 @@
+rootProject.name = "Tales-Of-Shinobi - BETA"

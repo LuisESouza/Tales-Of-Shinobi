@@ -1,0 +1,16 @@
+{
+  "Properties": {
+    "Translation": {
+      "Name": "server.items.Byakugan_Momoshiki_HD.name"
+    },
+    "Icon": "Icons/TalesOfShinobi/Eyes/Sharingan/Sharingan.png"
+  },
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Dojutsu HD/Dojutsu HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Byakugan HD/Byakugan HD_Variant_Momoshiki.png"
+    }
+  },
+  "Icon": "Icons/TalesOfShinobi/Eyes/Byakugan HD/Byakugan HD_Variant_Momoshiki.png"
+}

@@ -1,0 +1,27 @@
+$C = "../../Common.ui";
+
+Group #LevelHudRoot {
+  LayoutMode: Top;
+  Anchor: (Bottom: 260, Width: 630, Height: 50);
+
+  Group #BarContainer {
+    Anchor: (Width: 630, Height: 250);
+    Background: "../Assets/Bars/XpBar.png";
+
+    ProgressBar #XpBar {
+      Anchor: (Width: 630, Height: 250);
+      BarTexturePath: "../Assets/Bars/XpBarFill.png";
+    }
+  }
+
+  Label #XpText {
+    Style: (
+      FontSize: 13,
+      TextColor: #FFCC00,
+      RenderBold: true,
+      Alignment: Center
+    );
+    Anchor: (Width: 662, Height: 20, Top: -135);
+    Text: "LEVEL: 1 XP: 0 / 0";
+  }
+}

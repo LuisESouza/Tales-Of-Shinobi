@@ -1,0 +1,16 @@
+{
+  "Properties": {
+    "Translation": {
+      "Name": "server.items.Kokugan_Isshiki_HD.name"
+    },
+    "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png"
+  },
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Kokugan HD/Kokugan HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Kokugan HD/Kokugan HD_Variant_Isshiki.png"
+    }
+  },
+  "Icon": "Icons/Wardrobe/Eyes/Kokugan HD/Kokugan HD_Variant_Isshiki.png"
+}

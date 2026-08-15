@@ -1,0 +1,8 @@
+{
+  "Group": "com.cachorrovascaino",
+  "Name": "Tales-Of-Shinobi",
+  "Version": "0.0.2",
+  "Main": "com.cachorrovascaino.plugin.Main",
+  "ServerVersion": "^0.5.4",
+  "IncludesAssetPack": true
+}

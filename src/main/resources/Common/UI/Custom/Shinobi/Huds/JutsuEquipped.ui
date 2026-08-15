@@ -1,0 +1,28 @@
+$C = "../../Common.ui";
+
+Group #JutsuEquippedRoot {
+    LayoutMode: Right;
+
+    Group #EquippedPanel {
+        LayoutMode: Top;
+        Anchor: (Top: 600, Width: 320, Height: 268, Left: 10);
+
+        // --- TÍTULO DA HUD ---
+        Group #HeaderContainer {
+            LayoutMode: Left;
+            Anchor: (Width: 304, Height: 28);
+            Background: (TexturePath: "../../Common/Popup.png", Border: 4);
+
+            Label #HeaderTitle {
+                Anchor: (Width: 304, Height: 28);
+                Text: "EQUIPPED JUTSUS";
+                Style: (...$C.@DefaultLabelStyle, TextColor: #E8A93B, RenderBold: true, FontSize: 12, VerticalAlignment: Center, HorizontalAlignment: Center);
+            }
+        }
+
+        Group #SlotsContainer {
+            LayoutMode: Top;
+            Anchor: (Top: 6, Width: 304, Height: 240);
+        }
+    }
+}

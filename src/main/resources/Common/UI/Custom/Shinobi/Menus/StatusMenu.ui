@@ -1,0 +1,256 @@
+$C = "../../Common.ui";
+
+Group {
+    Anchor: (Width: 940, Height: 520);
+    LayoutMode: Top;
+
+    Group #NavigationContent{
+        Anchor: (Width: 940, Height: 50);
+        LayoutMode: Left;
+    }
+
+    Group{
+        LayoutMode: Left;
+
+        $C.@Container {
+            Anchor: (Right: 20, Width: 340);
+            #Title {
+                Group {
+                    LayoutMode: Left;
+                    $C.@Title { @Text = "SHINOBI"; }
+                }
+            }
+
+            #Content {
+                CharacterPreviewComponent {
+                    Anchor: (Left: 0, Width: 320, Height: 300, Top: 5);
+                    Padding: (Top: -20, Bottom: -20, Left: -20, Right: -20);
+                }
+
+                // --- FICHA DE INFORMAÇÕES DO SHINOBI ---
+                Group #InfoPlayer {
+                    LayoutMode: Top;
+                    Anchor: (Top: 5, Width: 320, Height: 130);
+                    Background: (TexturePath: "../../Common/ContainerPanelPatch.png", Border: 4);
+                    Padding: (Full: 10);
+
+                    Group #RowName {
+                        LayoutMode: Left;
+                        Anchor: (Height: 28, Width: 300);
+
+                        Label #LabelPlayerName {
+                            Anchor: (Width: 300);
+                            Text: "Name: -";
+                            Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, VerticalAlignment: Center);
+                        }
+                    }
+
+                    Group #RowClan {
+                        LayoutMode: Left;
+                        Anchor: (Top: 4, Height: 28, Width: 300);
+
+                        Label #LabelClan {
+                            Anchor: (Width: 300);
+                            Text: "Clan: -";
+                            Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, VerticalAlignment: Center);
+                        }
+                    }
+
+                    Group #RowElement {}
+                }
+            }
+        }
+
+        $C.@Container {
+            Anchor: (Width: 620, Height: 520);
+
+            #Title {
+                Group {
+                    LayoutMode: Left;
+                    $C.@Title {
+                        @Text = "PANEL STATUS";
+                    }
+                }
+            }
+
+            #Content {
+                // --- CARD DE PONTOS DE ATRIBUTO ---
+                Group #ProfileCard {
+                    LayoutMode: Top;
+                    Background: (TexturePath: "../../Common/ContainerPanelPatch.png", Border: 4);
+                    Padding: (Full: 12);
+
+                    Group #ProfileRow3 {
+                        LayoutMode: Left;
+                        Anchor: (Height: 26);
+
+                        Label #LabelPoints {
+                            Anchor: (Width: 560);
+                            Text: "Pontos de Atributo: 0";
+                            Style: (...$C.@DefaultLabelStyle, TextColor: #E8A93B, RenderBold: true, FontSize: 16);
+                        }
+                    }
+                }
+
+                $C.@PanelSeparatorFancy {}
+
+                Group #StatusContent {
+                    LayoutMode: Left;
+                    Anchor: (Top: 15, Height: 260);
+
+                    Group #StatusDefault {
+                        LayoutMode: Top;
+                        Anchor: (Width: 280);
+
+                        Label {
+                            Text: "VITAIS";
+                            Anchor: (Height: 25);
+                            Style: (FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #94969a);
+                        }
+
+                        Group #LifeGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnLife {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelLife {
+                                Anchor: (Left: 12);
+                                Text: "Vida: 100";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+
+                        Group #StaminaGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnStamina {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelStamina {
+                                Anchor: (Left: 12);
+                                Text: "Stamina: 100";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+
+                        Group #SpeedGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnSpeed {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelSpeed {
+                                Anchor: (Left: 12);
+                                Text: "Speed: 0";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+
+                        Group #ChakraGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnChakra {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelChakra {
+                                Anchor: (Left: 12);
+                                Text: "Chakra: 100";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+                    }
+
+                    Group #ShinobiStatus {
+                        LayoutMode: Top;
+                        Anchor: (Left: 20, Width: 280);
+
+                        Label {
+                            Text: "HABILIDADES";
+                            Anchor: (Height: 25);
+                            Style: (FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #94969a);
+                        }
+
+                        Group #NinjutsuGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnNinjutsu {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelNinjutsu {
+                                Anchor: (Left: 12);
+                                Text: "Ninjutsu: 0";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+
+                        Group #TaijutsuGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnTaijutsu {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelTaijutsu {
+                                Anchor: (Left: 12);
+                                Text: "Taijutsu: 0";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+
+                        Group #GenjutsuGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnGenjutsu {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelGenjutsu {
+                                Anchor: (Left: 12);
+                                Text: "Genjutsu: 0";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+
+                        Group #ChakraControlGroup {
+                            LayoutMode: Left;
+                            Anchor: (Top: 10, Height: 35);
+
+                            $C.@SmallSecondaryTextButton #BtnChakraControl {
+                                @Text = "+";
+                                Anchor: (Width: 28, Height: 28);
+                            }
+
+                            Label #LabelChakraControl {
+                                Anchor: (Left: 12);
+                                Text: "Chakra Control: 0";
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+$C.@BackButton {}

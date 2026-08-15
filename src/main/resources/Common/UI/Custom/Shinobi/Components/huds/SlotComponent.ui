@@ -1,0 +1,34 @@
+$C = "../../../Common.ui";
+
+Group #SlotBox {
+    LayoutMode: Left;
+    Background: (TexturePath: "../../../Common/ContainerPanelPatch.png", Border: 4);
+    Anchor: (Width: 240, Height: 60, Top: 6);
+
+    Label #SlotName {
+        Anchor: (Top: 16, Width: 152, Height: 30);
+        Text: "Empty Slot";
+        Style: (...$C.@DefaultLabelStyle, TextColor: #00d2ff, RenderBold: true, FontSize: 14, HorizontalAlignment: Center, VerticalAlignment: Center);
+    }
+
+    Group {
+        Anchor: (Top: 6);
+        LayoutMode: Top;
+
+        Group #BarContainer {
+            Anchor: (Width: 45, Height: 45);
+            Background: "SlotDeveloper.png";
+
+            ProgressBar #CooldownBar {
+              Anchor: (Width: 45, Height: 45);
+              BarTexturePath: "SlotCommon.png";
+            }
+        }
+
+        Label #SlotCooldown {
+            Anchor: (Top:-32, Width: 64, Height: 20);
+            Text: "READY";
+            Style: (...$C.@DefaultLabelStyle, TextColor: #FFFFFF, RenderBold: true, FontSize: 12, HorizontalAlignment: Center, VerticalAlignment: Center);
+        }
+    }
+}

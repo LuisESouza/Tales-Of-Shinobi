@@ -1,0 +1,16 @@
+$C = "../../../Common.ui";
+
+Group #NavigationMenusRoot {
+    Anchor: (Width: 940, Height: 50);
+    LayoutMode: Left;
+
+    $C.@SmallSecondaryTextButton #BtnStatusMenu {
+        @Text = "Stats Menu";
+        Anchor: (Width: 120, Height: 50);
+    }
+
+    $C.@SmallSecondaryTextButton #BtnSkillsMenu {
+        @Text = "Skills Menu";
+        Anchor: (Width: 120, Height: 50, Left: 15);
+    }
+}

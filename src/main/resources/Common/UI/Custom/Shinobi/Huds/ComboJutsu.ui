@@ -1,0 +1,36 @@
+$C = "../../Common.ui";
+
+Group #ComboJutsuRoot {
+    LayoutMode: Right;
+
+    Group #ComboPanel {
+        LayoutMode: Top;
+        Anchor: (Top: 970, Width: 290, Height: 110, Right: 320);
+        Padding: (Full: 8);
+
+        Group #InputSequenceContainer {
+            LayoutMode: Left;
+            Anchor: (Width: 274, Height: 32);
+            Background: (TexturePath: "../../Common/Popup.png", Border: 4);
+
+            Label #KeyText {
+                Anchor: (Width: 274, Height: 32);
+                Text: "Left - Left - Right";
+                Style: (...$C.@DefaultLabelStyle, TextColor: #00d2ff, RenderBold: true, FontSize: 13, VerticalAlignment: Center, HorizontalAlignment: Center);
+            }
+        }
+
+        Group #JutsuResultBox {
+            LayoutMode: Top;
+            Anchor: (Top: 8, Width: 274, Height: 48);
+            Background: (TexturePath: "../../Common/Popup.png", Border: 4);
+            Padding: (Full: 6);
+
+            Label #JutsuName {
+                Anchor: (Top: 4, Width: 262, Height: 28);
+                Text: "Katon: Gōkakyū no Jutsu!";
+                Style: (...$C.@DefaultLabelStyle, TextColor: #e6ad45, RenderBold: true, FontSize: 14, VerticalAlignment: Center, HorizontalAlignment: Center);
+            }
+        }
+    }
+}

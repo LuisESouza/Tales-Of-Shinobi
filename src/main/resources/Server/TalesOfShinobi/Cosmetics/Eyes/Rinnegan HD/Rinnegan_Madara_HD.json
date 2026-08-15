@@ -1,0 +1,16 @@
+{
+  "Properties": {
+    "Translation": {
+      "Name": "server.items.Rinnegan_Madara_HD.name"
+    },
+    "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png"
+  },
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Rinnegan HD/Rinnegan HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Rinnegan HD/Rinnegan HD_Variant_Madara.png"
+    }
+  },
+  "Icon": "Icons/Wardrobe/Eyes/Rinnegan HD/Rinnegan HD_Variant_Madara.png"
+}

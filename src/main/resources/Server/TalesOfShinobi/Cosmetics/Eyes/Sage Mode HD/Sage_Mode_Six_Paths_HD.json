@@ -1,0 +1,16 @@
+{
+  "Properties": {
+    "Translation": {
+      "Name": "server.items.Sage_Mode_Six_Paths_HD.name"
+    },
+    "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png"
+  },
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Sage Mode HD/Sage Mode HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Sage Mode HD/Sage Mode HD_Variant_Six Paths.png"
+    }
+  },
+  "Icon": "Icons/Wardrobe/Eyes/Sage Mode HD/Sage Mode HD_Variant_Six Paths.png"
+}

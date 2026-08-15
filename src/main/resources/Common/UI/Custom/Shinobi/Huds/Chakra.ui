@@ -1,0 +1,27 @@
+$C = "../../Common.ui";
+
+Group #ChakraRoot {
+  Anchor: (Top: -740);
+  LayoutMode: Left;
+
+  Group {
+        Anchor: (Width: 130, Height: 255);
+        LayoutMode: Top;
+
+    Group {
+        Anchor: (Left: 0, Width: 120, Height: 235);
+        Background: "../Assets/Bars/ChakraBar.png";
+
+        ProgressBar #ChakraBar {
+            Anchor: (Width: 130, Height: 255);
+            BarTexturePath: "../Assets/Bars/ChakraBarFill.png";
+        }
+    }
+
+    Label #ChakraText {
+        Anchor: (Width: 250);
+        Text: "Testando";
+        Style: (...$C.@DefaultLabelStyle, TextColor: #E8A93B, RenderBold: true, FontSize: 16, VerticalAlignment: Center, HorizontalAlignment: Center);
+    }
+  }
+}

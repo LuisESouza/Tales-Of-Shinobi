@@ -1,0 +1,18 @@
+$C = "../../../Common.ui";
+
+Group #FireRoot {
+    LayoutMode: Left;
+    Anchor: (Top: 4, Height: 28, Width: 300);
+
+    Group #ImageTest {
+        Anchor: (Width: 24, Height: 24);
+        LayoutMode: Top;
+        Background: PatchStyle(TexturePath: "../../Assets/ImgElements/Fire.png");
+    }
+
+    Label #LabelElement {
+        Anchor: (Left: 8, Width: 260);
+        Text: "Element: Fire";
+        Style: (...$C.@DefaultLabelStyle, TextColor: #7a9cc6, VerticalAlignment: Center);
+    }
+}

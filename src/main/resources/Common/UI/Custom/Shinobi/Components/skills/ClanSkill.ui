@@ -1,0 +1,157 @@
+$C = "../../../Common.ui";
+
+Group #ClanSkillRoot {
+    LayoutMode: Left;
+    Anchor: (Width: 560, Height: 78, Top: 6);
+    Background: (TexturePath: "../../../Common/ContainerPanelPatch.png", Border: 4);
+    Padding: (Full: 8);
+
+    /* ========================================================================= */
+    /* OPÇÃO 1: MODO SELEÇÃO DE CLÃ (Deixar visível no Java se clan == NONE)     */
+    /* ========================================================================= */
+    Group #SelectClanView {
+        LayoutMode: Left;
+        Anchor: (Full: 0);
+
+        Group #ClanIconContainer {
+            Anchor: (Width: 62, Height: 62);
+            Background: #000000(0.5);
+
+            Group #ClanIcon {
+                Anchor: (Width: 54, Height: 54, Top: 4, Left: 4);
+            }
+        }
+
+        Group #ClanDetails {
+            LayoutMode: Top;
+            Anchor: (Left: 12, Width: 320, Height: 62);
+
+            Group #RowClanHeader {
+                LayoutMode: Left;
+                Anchor: (Height: 22);
+
+                Label #LabelClanName {
+                    Anchor: (Height: 22);
+                    Text: "Uchiha";
+                    Style: (...$C.@DefaultLabelStyle, TextColor: #FF4D4D, RenderBold: true, FontSize: 15, VerticalAlignment: Center);
+                }
+            }
+
+            Group #RowClanDesc {
+                Anchor: (Top: 2, Height: 18);
+
+                Label #LabelClanDescription {
+                    Text: "Mestres do Katon com excelente controle de Chakra.";
+                    Style: (...$C.@DefaultLabelStyle, FontSize: 11, TextColor: #94969a, VerticalAlignment: Center);
+                }
+            }
+
+            Group #RowClanBuffs {
+                LayoutMode: Left;
+                Anchor: (Top: 2, Height: 18);
+
+                Label #LabelClanHpBonus {
+                    Text: "Vida: +0";
+                    Style: (...$C.@DefaultLabelStyle, FontSize: 11, TextColor: #50E3C2, VerticalAlignment: Center);
+                }
+
+                Label #LabelClanChakraBonus {
+                    Anchor: (Left: 10);
+                    Text: "Chakra: +25";
+                    Style: (...$C.@DefaultLabelStyle, FontSize: 11, TextColor: #4a90e2, VerticalAlignment: Center);
+                }
+
+                Label #LabelClanCtrlBonus {
+                    Anchor: (Left: 10);
+                    Text: "Controle: 1.2x";
+                    Style: (...$C.@DefaultLabelStyle, FontSize: 11, TextColor: #E8A93B, VerticalAlignment: Center);
+                }
+            }
+        }
+
+        Group #ClanAction {
+            LayoutMode: Left;
+            Anchor: (Right: 5, Width: 130, Height: 62);
+
+            $C.@SmallSecondaryTextButton #BtnSelectClan {
+                @Text = "ENTRAR NO CLÃ";
+                Anchor: (Width: 130, Height: 36, Top: 13);
+            }
+        }
+    }
+
+    /* ========================================================================= */
+    /* OPÇÃO 2: MODO CLÃ ATIVO + SKILLS (Deixar visível no Java se clan != NONE) */
+    /* ========================================================================= */
+    Group #ClanSkillsView {
+        LayoutMode: Left;
+        Anchor: (Full: 0);
+        Visible: false;
+
+        Group #MyClanInfo {
+            LayoutMode: Left;
+            Anchor: (Width: 200, Height: 62);
+
+            Group #MyClanIconContainer {
+                Anchor: (Width: 62, Height: 62);
+                Background: #000000(0.5);
+
+                Group #MyClanIcon {
+                    Anchor: (Width: 54, Height: 54, Top: 4, Left: 4);
+                }
+            }
+
+            Group #MyClanHeader {
+                LayoutMode: Top;
+                Anchor: (Left: 10, Width: 120, Height: 62);
+
+                Label #LabelMyClanTitle {
+                    Text: "SEU CLÃ";
+                    Style: (...$C.@DefaultLabelStyle, TextColor: #94969a, FontSize: 10, RenderBold: true);
+                }
+
+                Label #LabelMyClanName {
+                    Anchor: (Top: 2);
+                    Text: "UCHIHA";
+                    Style: (...$C.@DefaultLabelStyle, TextColor: #FF4D4D, RenderBold: true, FontSize: 15);
+                }
+
+                Label #LabelMyClanStatus {
+                    Anchor: (Top: 4);
+                    Text: "Ativo";
+                    Style: (...$C.@DefaultLabelStyle, TextColor: #50E3C2, FontSize: 11);
+                }
+            }
+        }
+
+        Group #Divider {
+            Anchor: (Left: 5, Width: 2, Height: 50, Top: 6);
+            Background: #ffffff(0.1);
+        }
+
+        Group #ClanSkillsContainer {
+            LayoutMode: Left;
+            Anchor: (Left: 12, Width: 330, Height: 62);
+
+            Group #SkillsGrid {
+                LayoutMode: Left;
+                Anchor: (Full: 0);
+
+                Group #SkillSlotItem {
+                    Anchor: (Width: 54, Height: 54, Left: 4, Top: 4);
+                    Background: #000000(0.6);
+
+                    Group #SkillIcon {
+                        Anchor: (Width: 46, Height: 46, Top: 4, Left: 4);
+                    }
+
+                    Label #LabelSkillLevel {
+                        Anchor: (Right: 2, Bottom: 2);
+                        Text: "1";
+                        Style: (...$C.@DefaultLabelStyle, TextColor: #50E3C2, RenderBold: true, FontSize: 10);
+                    }
+                }
+            }
+        }
+    }
+}

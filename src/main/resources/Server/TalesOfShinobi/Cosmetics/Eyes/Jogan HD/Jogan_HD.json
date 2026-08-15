@@ -1,0 +1,16 @@
+{
+  "Properties": {
+    "Translation": {
+      "Name": "server.items.Jogan_HD.name"
+    },
+    "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png"
+  },
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Jogan HD/Jogan HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Jogan HD/Jogan HD.png"
+    }
+  },
+  "Icon": "Icons/Wardrobe/Eyes/Jogan HD/Jogan HD.png"
+}

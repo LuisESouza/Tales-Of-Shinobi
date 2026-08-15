@@ -1,0 +1,16 @@
+{
+  "Properties": {
+    "Translation": {
+      "Name": "server.items.Dojutsu_Ranmaru_HD.name"
+    },
+    "Icon": "Icons/TalesOfShinobi/Eyes/Sharingan/Sharingan.png"
+  },
+  "CosmeticSlot": "Eyes",
+  "Appearance": {
+    "Model": "Characters/Eyes/Dojutsu HD/Dojutsu HD.blockymodel",
+    "TextureConfig": {
+      "Texture": "Characters/Eyes/Dojutsu HD/Dojutsu HD_Variant_Ranmaru.png"
+    }
+  },
+  "Icon": "Icons/TalesOfShinobi/Eyes/Dojutsu HD/Dojutsu HD_Variant_Ranmaru.png"
+}
