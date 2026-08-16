@@ -2,76 +2,116 @@ $C = "../../../Common.ui";
 
 Group #JutsuCardRoot {
     LayoutMode: Left;
-    Anchor: (Width: 560, Height: 70, Top: 6);
+    Anchor: (Width: 560, Height: 96, Top: 6);
     Background: (TexturePath: "../../../Common/ContainerPanelPatch.png", Border: 4);
-    Padding: (Full: 8);
+    Padding: (Full: 6);
 
+    // --- ÍCONE DO JUTSU ---
     Group #JutsuIconContainer {
-        Anchor: (Width: 54, Height: 54);
+        Anchor: (Width: 54, Height: 84);
         Background: #000000(0.5);
 
         Group #JutsuIcon {
-            Anchor: (Width: 48, Height: 48, Top: 3, Left: 3);
+            Anchor: (Width: 48, Height: 48, Top: 18, Left: 3);
         }
     }
 
+    // --- INFORMAÇÕES E DETALHES ---
     Group #JutsuInfo {
         LayoutMode: Top;
-        Anchor: (Left: 12, Width: 320, Height: 54);
+        Anchor: (Left: 10, Width: 385, Height: 84);
 
+        // Cabeçalho: Nome e Tipo
         Group #RowHeader {
             LayoutMode: Left;
-            Anchor: (Height: 24);
+            Anchor: (Height: 20);
 
             Label #LabelJutsuName {
-                Anchor: (Height: 24);
+                Anchor: (Height: 20);
                 Text: "Jutsu Name";
-                Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, RenderBold: true, FontSize: 14, VerticalAlignment: Center);
-            }
-
-            Label #LabelJutsuLevel {
-                Anchor: (Left: 6, Height: 24);
-                Text: "[Lv. 1]";
-                Style: (...$C.@DefaultLabelStyle, TextColor: #50E3C2, RenderBold: true, FontSize: 12, VerticalAlignment: Center);
+                Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, RenderBold: true, FontSize: 13, VerticalAlignment: Center);
             }
 
             Label #LabelJutsuType {
-                Anchor: (Left: 8, Height: 24);
+                Anchor: (Left: 8, Height: 20);
                 Text: "[Ninjutsu]";
-                Style: (...$C.@DefaultLabelStyle, FontSize: 11, TextColor: #E8A93B, VerticalAlignment: Center);
+                Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #E8A93B, VerticalAlignment: Center);
             }
         }
 
-        Group #RowDetails {
-            LayoutMode: Left;
-            Anchor: (Top: 4, Height: 22);
+        // Linha Secundária: Badges / Chips de Atributos e Progresso
+        Group #ColumnItems {
+            LayoutMode: Top;
+            Anchor: (Top: 6);
 
-            Label #LabelJutsuCost {
-                Text: "Chakra: 30";
-                Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #4a90e2, VerticalAlignment: Center);
+            // Linha 1: Custo de Chakra & Nível Atual
+            Group #RowItems1 {
+                LayoutMode: Left;
+                Anchor: (Height: 18);
+
+                Group #ChipCost {
+                    LayoutMode: Left;
+                    Background: #000000(0.35);
+                    Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+
+                    Label #LabelJutsuCost {
+                        Text: "Chakra: 30";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #4a90e2, RenderBold: true, VerticalAlignment: Center);
+                    }
+                }
+
+                Group #ChipLevel {
+                    LayoutMode: Left;
+                    Anchor: (Left: 6);
+                    Background: #000000(0.35);
+                    Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+
+                    Label #LabelJutsuLevel {
+                        Text: "Lv. 1";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #50E3C2, RenderBold: true, VerticalAlignment: Center);
+                    }
+                }
             }
 
-            Label #LabelJutsuXp {
-                Anchor: (Left: 12);
-                Text: "XP: 0/50";
-                Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #F5A623, VerticalAlignment: Center);
-            }
+            // Linha 2: XP Atual e Requisitos
+            Group #RowItems2 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Height: 18);
 
-            Label #LabelJutsuReq {
-                Anchor: (Left: 12);
-                Text: "Req: Lvl 1";
-                Style: (...$C.@DefaultLabelStyle, FontSize: 12, TextColor: #94969a, VerticalAlignment: Center);
+                Group #ChipXp {
+                    LayoutMode: Left;
+                    Background: #000000(0.35);
+                    Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+
+                    Label #LabelJutsuXp {
+                        Text: "XP: 0/50";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #F5A623, VerticalAlignment: Center);
+                    }
+                }
+
+                Group #ChipReq {
+                    LayoutMode: Left;
+                    Anchor: (Left: 6);
+                    Background: #000000(0.35);
+                    Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+
+                    Label #LabelJutsuReq {
+                        Text: "Req: Lvl 1";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #d0d2d6, VerticalAlignment: Center);
+                    }
+                }
             }
         }
     }
 
+    // --- BOTÃO DE AÇÃO ---
     Group #JutsuAction {
         LayoutMode: Left;
-        Anchor: (Right: 5, Width: 120, Height: 54);
+        Anchor: (Width: 90, Height: 84);
 
         $C.@SmallSecondaryTextButton #BtnJutsuAction {
             @Text = "APRENDER";
-            Anchor: (Width: 120, Height: 34, Top: 10);
+            Anchor: (Width: 90, Height: 30, Top: 27);
         }
     }
 }

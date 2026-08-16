@@ -2,6 +2,7 @@ package com.cachorrovascaino.plugin.Manager;
 
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
+import com.cachorrovascaino.plugin.Features.Jutsu.DotonWallJutsu;
 import com.cachorrovascaino.plugin.Features.Jutsu.fire.FireBallJutsu;
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
 import com.cachorrovascaino.plugin.Features.Jutsu.ShadowCloneJutsu;
@@ -58,6 +59,7 @@ public class JutsuManager {
         registerJutsu(SubstitutionJutsu.INSTANCE);
         registerJutsu(WaterBallJutsu.INSTANCE);
         registerJutsu(MeteoroJutsu.INSTANCE);
+        registerJutsu(DotonWallJutsu.INSTANCE);
     }
 
     private void registerJutsu(Jutsu jutsu) {

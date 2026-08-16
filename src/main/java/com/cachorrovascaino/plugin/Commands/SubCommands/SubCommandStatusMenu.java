@@ -20,6 +20,9 @@ public class SubCommandStatusMenu extends AbstractPlayerCommand {
     }
 
     @Override
+    protected boolean canGeneratePermission() { return false; }
+
+    @Override
     protected void execute(
             @NonNullDecl CommandContext commandContext,
             @NonNullDecl Store<EntityStore> store,

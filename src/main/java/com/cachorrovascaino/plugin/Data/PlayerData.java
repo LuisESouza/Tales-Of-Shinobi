@@ -22,6 +22,7 @@ public class PlayerData {
     private String eyesId = "";
     private String eyesColor = "";
     private String originalEyesId = "";
+    private String originalEyesColor = "";
 
     // --- DŌJUTSU / TRANSFORMAÇÕES VISUAIS DE OLHOS ---
     private boolean eyeDojutsuActive = false;
@@ -72,7 +73,7 @@ public class PlayerData {
         this.name = name;
         this.uuid = uuid;
         this.village = "Konoha";
-        this.clan = "Uchiha";
+        this.clan = "None";
         this.ninjaRank = "Estudante";
         this.element = "Ray";
 
@@ -115,6 +116,8 @@ public class PlayerData {
 
         this.unlockedClanJutsu = new ArrayList<>();
         this.equippedClanHotbar = new HashMap<>();
+
+
     }
 
     // --- MÉTODOS DE CONTROLE DO DŌJUTSU & OLHOS ---
@@ -143,12 +146,16 @@ public class PlayerData {
         while (this.currentXp >= this.xpUp && this.currentLevel < this.maxLevel) {
             this.currentXp -= this.xpUp;
             this.currentLevel++;
-            this.availablePoints += 3;
+            addPoint(6);
             this.xpUp = (float) Math.floor(this.xpUp * 1.5f);
             leveledUp = true;
         }
 
         return leveledUp;
+    }
+
+    public void addPoint(int point){
+        this.availablePoints += point;
     }
 
     public boolean addJutsuXp(String jutsuId, float amount) {
@@ -216,6 +223,8 @@ public class PlayerData {
     public String getOriginalEyesId() { return originalEyesId; }
     public void setOriginalEyesId(String originalEyesId) { this.originalEyesId = originalEyesId; }
 
+    public String getOriginalEyesColor() { return originalEyesColor; }
+    public void setOriginalEyesColor(String originalEyesColor) { this.originalEyesColor = originalEyesColor; }
 
     // --- DŌJUTSU GETTERS E SETTERS ---
     public boolean isEyeDojutsuActive() { return eyeDojutsuActive; }
@@ -324,9 +333,17 @@ public class PlayerData {
         return unlockedClanJutsu;
     }
 
+    public void setUnlockedClanJutsu(List<String> unlockedClanJutsu){
+        this.unlockedClanJutsu = unlockedClanJutsu;
+    }
+
     public Map<String, String> getEquippedClanHotbar() {
         if(equippedClanHotbar == null) equippedClanHotbar = new HashMap<>();
         return equippedClanHotbar;
+    }
+
+    public void setEquippedClanHotbar(Map<String, String> equippedClanHotbar){
+        this.equippedClanHotbar = equippedClanHotbar;
     }
 
     public boolean canUnlockClanSkill(ClanType.ClanSkill skill) {
@@ -336,8 +353,10 @@ public class PlayerData {
         if (this.taijutsu < skill.getRequiredTaijutsu()) return false;
         if (this.ninjutsu < skill.getRequiredNinjutsu()) return false;
         if (this.genjutsu < skill.getRequiredGenjutsu()) return false;
-        if (this.kekkeiGenkai < skill.getRequiredKekkeiGenkai()) return false;
+        if (skill.hasRequirement()) {
+            return hasUnlockClanSkill(skill.getRequiredSkillId());
+        }
 
-        return !skill.hasRequirement() || hasJutsuUnlocked(skill.getRequiredSkillId());
+        return true;
     }
 }

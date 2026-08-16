@@ -2,10 +2,11 @@ package com.cachorrovascaino.plugin.Data.Jutsus;
 
 public enum JutsuType {
     SUBSTITUTION("substitution_jutsu", "Substitution", 10, 2, 10.0f, 10),
-    SHADOW_CLONE("shadow_clone", "Kage Bunshin", 15, 5, 25.0f, 20),
+    SHADOW_CLONE("shadow_clone", "Kage Bunshin", 15, 5, 25.0f, 15),
     FIREBALL("fireball_jutsu", "Goukakyuu no Jutsu", 25, 10, 40.0f, 20),
     WATERBALL("waterball_jutsu", "Suiryūdan no Jutsu", 25, 10, 40.0f, 20),
-    METEORO("tengai_shinsei", "Tengai Shinsei", 25, 10, 50, 1);
+    METEORO("tengai_shinsei", "Tengai Shinsei", 25, 10, 50, 25),
+    DOTONWALL("doton_wall", "Doton wall", 25, 10, 25, 8);
 
     private final String id;
     private final String name;

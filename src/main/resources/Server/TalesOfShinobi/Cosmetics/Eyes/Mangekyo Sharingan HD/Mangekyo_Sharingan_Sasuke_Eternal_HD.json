@@ -1,16 +1,11 @@
 {
-  "Properties": {
-    "Translation": {
-      "Name": "server.items.Mangekyo_Sharingan_Sasuke_Eternal_HD.name"
-    },
-    "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png"
-  },
+  "Type": "EyeAttachment",
+  "Icon": "Icons/Wardrobe/Eyes/Sharingan/Sharingan.png",
   "CosmeticSlot": "Eyes",
   "Appearance": {
     "Model": "Characters/Eyes/Mangekyo Sharingan HD/Mangekyo Sharingan HD.blockymodel",
     "TextureConfig": {
       "Texture": "Characters/Eyes/Mangekyo Sharingan HD/Mangekyo Sharingan HD_Variant_Sasuke Eternal.png"
     }
-  },
-  "Icon": "Icons/Wardrobe/Eyes/Mangekyo Sharingan HD/Mangekyo Sharingan HD_Variant_Sasuke Eternal.png"
+  }
 }

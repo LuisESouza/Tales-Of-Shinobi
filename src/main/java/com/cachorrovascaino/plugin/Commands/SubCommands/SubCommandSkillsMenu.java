@@ -18,6 +18,9 @@ public class SubCommandSkillsMenu  extends AbstractPlayerCommand {
     public SubCommandSkillsMenu(){super("skill", "Open panel of status", false);}
 
     @Override
+    protected boolean canGeneratePermission() { return false; }
+
+    @Override
     protected void execute(
             @NonNullDecl CommandContext commandContext,
             @NonNullDecl Store<EntityStore> store,

@@ -1,1 +1,1 @@
-rootProject.name = "Tales-Of-Shinobi - BETA"
+rootProject.name = "Tales-Of-Shinobi"

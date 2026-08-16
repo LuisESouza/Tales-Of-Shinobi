@@ -1,5 +1,6 @@
 package com.cachorrovascaino.plugin;
 
+import com.cachorrovascaino.plugin.Commands.CommandAdmin;
 import com.cachorrovascaino.plugin.Commands.CommandMenu;
 import com.cachorrovascaino.plugin.Cosmetics.CosmeticAsset;
 import com.cachorrovascaino.plugin.Cosmetics.EyeAttachmentCosmetic;
@@ -14,6 +15,8 @@ import com.cachorrovascaino.plugin.Manager.PlayerDataManager;
 import com.cachorrovascaino.plugin.Systems.ComboTickSystem;
 import com.cachorrovascaino.plugin.Systems.DamageTrackingSystem;
 import com.cachorrovascaino.plugin.Systems.DeathDetectionSystem;
+import com.cachorrovascaino.plugin.Utils.EyesUtils;
+import com.cachorrovascaino.plugin.Utils.WeatherUtils;
 import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.assetstore.AssetStore;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
@@ -45,6 +48,9 @@ public class Main extends JavaPlugin {
     private static CooldownManager cooldownManager;
     private static ClanManager clanManager;
 
+    private static EyesUtils eyesUtils;
+    private static WeatherUtils weatherUtils;
+
     private Map<UUID, UUID> lastAttackers;
     private ComponentType<EntityStore, DeathProcessed> deathMarkerType;
 
@@ -64,7 +70,7 @@ public class Main extends JavaPlugin {
         this.lastAttackers = new ConcurrentHashMap<>();
         this.deathMarkerType = this.getEntityStoreRegistry().registerComponent(DeathProcessed.class, "DeathProcessed", DeathProcessed.CODEC);
 
-        File pluginFolder = new File("NarutoMOD/");
+        File pluginFolder = new File("TalesOfShinobi/");
         if (!pluginFolder.exists()) { pluginFolder.mkdirs(); }
 
         dataManager = new PlayerDataManager(pluginFolder.toPath());
@@ -98,10 +104,13 @@ public class Main extends JavaPlugin {
     public static CooldownManager getCooldownManager(){ return cooldownManager; }
     public static ClanManager getClanManager() { return clanManager; }
 
-    public void RegisterCommand() { this.getCommandRegistry().registerCommand(new CommandMenu()); }
+    public void RegisterCommand() {
+        this.getCommandRegistry().registerCommand(new CommandMenu());
+        this.getCommandRegistry().registerCommand(new CommandAdmin());
+    }
 
     public void RegisterSystem(){
-        this.getEntityStoreRegistry().registerSystem(new ComboTickSystem(getJutsuManager()));
+        this.getEntityStoreRegistry().registerSystem(new ComboTickSystem(getJutsuManager(), dataManager, eyesUtils, weatherUtils));
         this.getEntityStoreRegistry().registerSystem(new DamageTrackingSystem(this.lastAttackers));
         this.getEntityStoreRegistry().registerSystem(new DeathDetectionSystem(this.lastAttackers, this.deathMarkerType));
     }

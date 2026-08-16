@@ -34,7 +34,6 @@ public class DamageTrackingSystem extends DamageEventSystem {
 
         if (targetRef == null || !targetRef.isValid() || damage.getMetaObject(RPG_DAMAGE_PROCESSED)) return;
 
-        // Identifica quem causou o dano (Entidade ou Projétil)
         Ref<EntityStore> attackerRef = null;
         if (damage.getSource() instanceof Damage.EntitySource src) {
             attackerRef = src.getRef();
@@ -52,7 +51,6 @@ public class DamageTrackingSystem extends DamageEventSystem {
         UUID attackerUUID = attackerUuidComp.getUuid();
         UUID targetUUID = targetUuidComp.getUuid();
 
-        // Salva a relação de quem atacou a vítima para o DeathDetectionSystem usar depois
         this.lastAttackers.put(targetUUID, attackerUUID);
     }
 

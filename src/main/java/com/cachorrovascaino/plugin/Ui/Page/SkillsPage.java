@@ -3,6 +3,7 @@ package com.cachorrovascaino.plugin.Ui.Page;
 import com.cachorrovascaino.plugin.Data.Clan.ClanType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
+import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Manager.PlayerDataManager;
 import com.cachorrovascaino.plugin.Ui.Hud.JutsuEquippedHud;
 import com.cachorrovascaino.plugin.Ui.Page.utils.NavigationButtons;
@@ -34,10 +35,11 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
     private String currentTab = "Ninjutsu";
 
     private int currentPage = 0;
-    private static final int ITEMS_PER_PAGE = 4;
+    private static final int ITEMS_PER_PAGE = 3;
 
     private static final String INTERFACE_MAIN = "Shinobi/Menus/SkillsMenu.ui";
     public static final String NINJUTSU_CARD_TEMPLATE = "Shinobi/Components/skills/NinjutsuSkill.ui";
+    public static final String ClAN_NINJUTSU_TEMPLATE = "Shinobi/Components/skills/Clan/ClanNinjutsus.ui";
     public static final String CLAN_CARD_TEMPLATE = "Shinobi/Components/skills/ClanSkill.ui";
 
     private static final Map<String, String> SKILLS_UI_MAP = Map.of(
@@ -101,21 +103,20 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         NavigationButtons.bindButtons(evt);
     }
 
+    // FIX: agora lê do hotbar de CLÃ (getEquippedClanHotbar), não do hotbar normal.
     public void buildSlotSkillClan(@Nonnull PlayerData data, @Nonnull UICommandBuilder cmd){
         cmd.clear("#EquippedJutsusPanel");
         cmd.append("#EquippedJutsusPanel", "Shinobi/Components/slots/ClanSlot.ui");
 
-        Map<String, String> hotbar = data.getEquippedHotbar();
+        Map<String, String> clanHotbar = data.getEquippedClanHotbar();
 
-        String slot1Jutsu = formatJutsuName(data, hotbar != null ? hotbar.get("slot_1") : null);
-        String slot2Jutsu = formatJutsuName(data, hotbar != null ? hotbar.get("slot_2") : null);
-        String slot3Jutsu = formatJutsuName(data, hotbar != null ? hotbar.get("slot_3") : null);
-        String slot4Jutsu = formatJutsuName(data, hotbar != null ? hotbar.get("slot_4") : null);
+        String slot1Jutsu = formatJutsuName(data, clanHotbar != null ? clanHotbar.get("slot_1") : null);
+        String slot2Jutsu = formatJutsuName(data, clanHotbar != null ? clanHotbar.get("slot_2") : null);
+        String slot3Jutsu = formatJutsuName(data, clanHotbar != null ? clanHotbar.get("slot_3") : null);
 
         cmd.set("#LabelSlot1.Text", slot1Jutsu);
         cmd.set("#LabelSlot2.Text", slot2Jutsu);
         cmd.set("#LabelSlot3.Text", slot3Jutsu);
-        cmd.set("#LabelSlot4.Text", slot4Jutsu);
     }
 
     public void buildSlotsSkill(@Nonnull PlayerData data, @Nonnull UICommandBuilder cmd) {
@@ -193,31 +194,36 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
 
                 int renderIndex = 0;
                 for (ClanType.ClanSkill skill : pageSkills) {
-                    cmd.append("#SkillsContent", NINJUTSU_CARD_TEMPLATE);
+                    cmd.append("#SkillsContent", ClAN_NINJUTSU_TEMPLATE);
                     String skillPath = "#SkillsContent[" + renderIndex + "]";
 
-                    boolean isUnlocked = data.hasJutsuUnlocked(skill.getId());
-                    boolean isEquipped = data.getEquippedHotbar() != null && data.getEquippedHotbar().containsValue(skill.getId());
+                    boolean isUnlocked = data.hasUnlockClanSkill(skill.getId());
+                    boolean isEquipped = skill.isEquippable()
+                            && data.getEquippedClanHotbar() != null
+                            && data.getEquippedClanHotbar().containsValue(skill.getId());
                     boolean canUnlock = data.canUnlockClanSkill(skill);
 
-                    int skillLevel = data.getJutsuLevel(skill.getId());
-                    float currentXp = data.getJutsuXp(skill.getId());
-                    float requiredXp = skillLevel * 50.0f;
-
                     cmd.set(skillPath + " #LabelJutsuName.Text", skill.getName());
-                    cmd.set(skillPath + " #LabelJutsuLevel.Text", "[Lv. " + skillLevel + "]");
                     cmd.set(skillPath + " #LabelJutsuType.Text", "[" + playerClan.getDisplayName() + "]");
                     cmd.set(skillPath + " #LabelJutsuCost.Text", "Chakra: " + (int) skill.getChakraCost());
-                    cmd.set(skillPath + " #LabelJutsuXp.Text", "XP: " + (int) currentXp + "/" + (int) requiredXp);
-                    cmd.set(skillPath + " #LabelJutsuReq.Text", "Req: Clã " + playerClan.getDisplayName());
+
+                    //Requisitos para deslobquear
+                    cmd.set(skillPath + " #LabelJutsuReq1.Text", "Ninj: " + skill.getRequiredNinjutsu());
+                    cmd.set(skillPath + " #LabelJutsuReq2.Text", "Taij: " + skill.getRequiredTaijutsu());
+                    //
+                    cmd.set(skillPath + " #LabelJutsuReq3.Text", "Genj: " + skill.getRequiredGenjutsu());
+                    cmd.set(skillPath + " #LabelJutsuReq4.Text", "Skill: " + skill.getRequiredSkillId());
+                    cmd.set(skillPath + " #LabelJutsuReq5.Text", "Chakra Max: " + skill.getRequiredMaxChakra());
 
                     String actionText = "LEARN";
                     if (!isUnlocked) {
                         if (!canUnlock) {
                             actionText = "BLOCKED";
                         }
-                    } else {
+                    } else if (skill.isEquippable()) {
                         actionText = isEquipped ? "UNEQUIP" : "EQUIP";
+                    } else {
+                        actionText = "LEARNED";
                     }
 
                     cmd.set(skillPath + " #BtnJutsuAction.Text", actionText);
@@ -430,12 +436,12 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
             return;
         }
 
-        toggleHotbarEquip(data, hotbar, jutsuId);
+        toggleHotbarEquip(data, hotbar, jutsuId, 4);
     }
 
     private void handleClanSkillAction(PlayerData data, String skillId) {
-        Map<String, String> hotbar = data.getEquippedHotbar();
-        if (hotbar == null) return;
+        Map<String, String> clanHotbar = data.getEquippedClanHotbar();
+        if (clanHotbar == null) return;
 
         ClanType playerClan = ClanType.fromName(data.getClan());
         if (playerClan == ClanType.NONE) return;
@@ -450,18 +456,22 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
 
         if (targetSkill == null) return;
 
-        if (!data.hasJutsuUnlocked(skillId)) {
+        if (!data.hasUnlockClanSkill(skillId)) {
             if (data.canUnlockClanSkill(targetSkill)) {
-                data.getUnlockedJutsus().add(skillId);
+                data.getUnlockedClanJutsu().add(skillId);
                 dataManager.savePlayer(uuid);
+
+                Main.get().getClanManager().onClanSkillUnlocked(playerRef, data, skillId);
             }
             return;
         }
 
-        toggleHotbarEquip(data, hotbar, skillId);
+        if (!targetSkill.isEquippable()) return;
+
+        toggleHotbarEquip(data, clanHotbar, skillId, 3);
     }
 
-    private void toggleHotbarEquip(PlayerData data, Map<String, String> hotbar, String id) {
+    private void toggleHotbarEquip(PlayerData data, Map<String, String> hotbar, String id, int maxSlots) {
         for (String key : hotbar.keySet()) {
             if (id.equals(hotbar.get(key))) {
                 hotbar.remove(key);
@@ -470,7 +480,7 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
             }
         }
 
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= maxSlots; i++) {
             String slotKey = "slot_" + i;
             if (!hotbar.containsKey(slotKey) || hotbar.get(slotKey) == null) {
                 hotbar.put(slotKey, id);

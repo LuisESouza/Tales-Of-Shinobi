@@ -1,0 +1,39 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_Summoned_Ally",
+  "Appearance": "Skeleton_Fighter",
+  "MaxHealth": 40,
+  "MaxSpeed": 6.0,
+  "Weapons": [],
+  "Parameters": {
+    "WanderRadius": {
+      "Value": 2.0
+    },
+    "LeashDistance": {
+      "Value": 12.0
+    },
+    "HardLeashDistance": {
+      "Value": 20.0
+    },
+    "DespawnTime": {
+      "Value": 60.0
+    },
+    "NameTranslationKey": {
+      "Value": "Esqueleto Invocado"
+    }
+  },
+  "Instructions": [
+    {
+      "Name": "Combat",
+      "Sensor": {
+        "Type": "HasHostileTargetMemory"
+      },
+      "Actions": [
+        {
+          "Type": "Attack",
+          "Attack": "Root_NPC_Skeleton_Fighter_Attack"
+        }
+      ]
+    }
+  ]
+}

@@ -12,4 +12,7 @@ public class CommandMenu extends AbstractCommandCollection {
         addSubCommand(new SubCommandStatusMenu());
         addSubCommand(new SubCommandSkillsMenu());
     }
+
+    @Override
+    protected boolean canGeneratePermission() { return false; }
 }
