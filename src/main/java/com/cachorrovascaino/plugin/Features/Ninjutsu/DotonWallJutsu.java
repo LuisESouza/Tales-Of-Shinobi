@@ -1,6 +1,7 @@
-package com.cachorrovascaino.plugin.Features.Jutsu;
+package com.cachorrovascaino.plugin.Features.Ninjutsu;
 
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Utils.BlockJutsuUtils;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -26,6 +27,7 @@ public class DotonWallJutsu implements Jutsu {
     @Override public String getDisplayName() { return "Doton: Doryūheki"; }
     @Override public float getChakraCost() { return 20.0f; }
     @Override public float getCooldown() { return 10.0f; }
+    @Override public SkillType getType() {return SkillType.NINJUTSU;}
 
     @Override
     public void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world) {

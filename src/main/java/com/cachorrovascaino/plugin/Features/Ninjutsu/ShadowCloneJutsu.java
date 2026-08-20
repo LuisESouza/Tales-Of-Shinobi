@@ -1,6 +1,7 @@
-package com.cachorrovascaino.plugin.Features.Jutsu;
+package com.cachorrovascaino.plugin.Features.Ninjutsu;
 
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
@@ -15,23 +16,18 @@ public class ShadowCloneJutsu implements Jutsu {
 
     public static final ShadowCloneJutsu INSTANCE = new ShadowCloneJutsu();
 
-    @Override
-    public String getId() {
+    @Override public String getId() {
         return "shadow_clone";
     }
-
-    @Override
-    public String getDisplayName() {
+    @Override public String getDisplayName() {
         return "Kage Bunshin no Jutsu";
     }
-
-    @Override
-    public float getChakraCost() {
-        return JutsuType.SHADOW_CLONE.getChakraCost();
+    @Override public float getChakraCost() {
+        return JutsuType.SHADOW_CLONE.getResourceCost();
     }
+    @Override public float getCooldown() {return JutsuType.SHADOW_CLONE.getCooldown();}
+    @Override public SkillType getType() {return SkillType.NINJUTSU;}
 
-    @Override
-    public float getCooldown() {return JutsuType.SHADOW_CLONE.getCooldown();}
 
     @Override
     public float getChakraCost(PlayerRef playerRef) {

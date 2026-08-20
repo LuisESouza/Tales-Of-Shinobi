@@ -24,6 +24,7 @@ import org.joml.Vector3d;
 import java.awt.Color;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.Consumer;
 
 public class ProjectileJutsuUtils {
 
@@ -42,23 +43,27 @@ public class ProjectileJutsuUtils {
         }
     }
 
-    /**
-     * Spawna um projétil de Jutsu com offsets de posição e escala customizada.
-     */
     public static void spawnProjectileJutsuEx(
-            PlayerRef playerRef,
-            Ref<EntityStore> playerEntityRef,
-            Store<EntityStore> store,
-            World world,
-            String assetKey,
-            float damageAmount,
-            double speed,
-            double rightOffset,
-            double upOffset,
-            double forwardOffset,
-            float scale,
-            String damageCauseKey,
-            String castMessage
+            PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world,
+            String assetKey, float damageAmount, double speed, double rightOffset, double upOffset, double forwardOffset,
+            float scale, String damageCauseKey, String castMessage
+    ) {
+        spawnProjectileJutsuEx(playerRef, playerEntityRef, store, world, assetKey, damageAmount, speed, rightOffset, upOffset, forwardOffset, scale, damageCauseKey, castMessage, null);
+    }
+
+    public static void spawnVerticalMeteorJutsu(
+            PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world,
+            String assetKey, float damageAmount, double fallSpeed, double targetDistance, double skyHeight,
+            float scale, String damageCauseKey, String castMessage
+    ) {
+        spawnVerticalMeteorJutsu(playerRef, playerEntityRef, store, world, assetKey, damageAmount, fallSpeed, targetDistance, skyHeight, scale, damageCauseKey, castMessage, null);
+    }
+
+    // --- MÉTODOS COMPLETOS (Com Suporte a Callback de Colisão) ---
+    public static void spawnProjectileJutsuEx(
+            PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world,
+            String assetKey, float damageAmount, double speed, double rightOffset, double upOffset, double forwardOffset,
+            float scale, String damageCauseKey, String castMessage, Consumer<Vector3d> onImpactCallback
     ) {
         if (playerRef == null || playerEntityRef == null || !playerEntityRef.isValid()) return;
 
@@ -88,28 +93,13 @@ public class ProjectileJutsuUtils {
 
         Vector3d velocityVector = new Vector3d(lookVector).mul(speed);
 
-        executeSpawn(playerRef, playerEntityRef, store, world, assetKey, damageAmount, spawnPosition, velocityVector, scale, damageCauseKey, castMessage);
+        executeSpawn(playerRef, playerEntityRef, store, world, assetKey, damageAmount, spawnPosition, velocityVector, scale, damageCauseKey, castMessage, onImpactCallback);
     }
 
-    /**
-     * Spawna um METEORO que cai 100% RETO na vertical (eixo Y negativo) sobre o ponto de alvo.
-     *
-     * @param targetDistance Distância à frente do jogador onde o meteoro vai cair no chão.
-     * @param skyHeight Altura no céu onde o meteoro vai nascer (acima do ponto de impacto).
-     */
     public static void spawnVerticalMeteorJutsu(
-            PlayerRef playerRef,
-            Ref<EntityStore> playerEntityRef,
-            Store<EntityStore> store,
-            World world,
-            String assetKey,
-            float damageAmount,
-            double fallSpeed,      // Velocidade de descida
-            double targetDistance, // Ex: 25.0 blocos à frente do jogador
-            double skyHeight,      // Ex: 80.0 blocos no céu
-            float scale,
-            String damageCauseKey,
-            String castMessage
+            PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world,
+            String assetKey, float damageAmount, double fallSpeed, double targetDistance, double skyHeight,
+            float scale, String damageCauseKey, String castMessage, Consumer<Vector3d> onImpactCallback
     ) {
         if (playerRef == null || playerEntityRef == null || !playerEntityRef.isValid()) return;
 
@@ -119,37 +109,25 @@ public class ProjectileJutsuUtils {
         HeadRotation headRotation = store.getComponent(playerEntityRef, HeadRotation.getComponentType());
         Rotation3f rotation = (headRotation != null) ? headRotation.getRotation() : transform.getRotation();
 
-        // 1. Calcula a direção horizontal (apenas no plano X/Z, pitch zerado)
         Vector3d forwardVector = new Vector3d();
         PhysicsMath.vectorFromAngles(rotation.yaw(), 0.0f, forwardVector);
         forwardVector.normalize();
 
-        // 2. Calcula onde é o ALVO NO CHÃO à frente do player
         Vector3d targetFloorPoint = new Vector3d(transform.getPosition())
                 .add(new Vector3d(forwardVector).mul(targetDistance));
 
-        // 3. Posição de SPAWN: Direto no céu (Y + skyHeight) acima do alvo
         Vector3d spawnPosition = new Vector3d(targetFloorPoint).add(0.0, skyHeight, 0.0);
-
-        // 4. VELOCIDADE 100% RETINHA PARA BAIXO: Apenas eixo Y negativo
         Vector3d velocityVector = new Vector3d(0.0, -fallSpeed, 0.0);
 
-        executeSpawn(playerRef, playerEntityRef, store, world, assetKey, damageAmount, spawnPosition, velocityVector, scale, damageCauseKey, castMessage);
+        executeSpawn(playerRef, playerEntityRef, store, world, assetKey, damageAmount, spawnPosition, velocityVector, scale, damageCauseKey, castMessage, onImpactCallback);
     }
 
-    // --- MÉTODO PRIVADO QUE EXECUTA O SPAWN, MODELO E DANO (REAPROVEITAMENTO) ---
+    // --- EXECUÇÃO INTERNA ---
+
     private static void executeSpawn(
-            PlayerRef playerRef,
-            Ref<EntityStore> playerEntityRef,
-            Store<EntityStore> store,
-            World world,
-            String assetKey,
-            float damageAmount,
-            Vector3d spawnPosition,
-            Vector3d velocityVector,
-            float scale,
-            String damageCauseKey,
-            String castMessage
+            PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world,
+            String assetKey, float damageAmount, Vector3d spawnPosition, Vector3d velocityVector,
+            float scale, String damageCauseKey, String castMessage, Consumer<Vector3d> onImpactCallback
     ) {
         ProjectileConfig config = ProjectileConfig.getAssetMap().getAsset(assetKey);
         if (config == null) {
@@ -182,7 +160,6 @@ public class ProjectileJutsuUtils {
                 commandBuffer.run(runStore -> {
                     if (!projectileRef.isValid()) return;
 
-                    // --- RECALCULA ESCALA, HITBOX E PARTÍCULAS NATIVAMENTE ---
                     if (scale != 1.0f) {
                         ModelComponent modelComp = runStore.getComponent(projectileRef, ModelComponent.getComponentType());
                         if (modelComp != null && modelComp.getModel() != null) {
@@ -227,6 +204,10 @@ public class ProjectileJutsuUtils {
                                 Damage.Source source = new Damage.ProjectileSource(playerEntityRef, ref);
                                 Damage damageEvent = new Damage(source, damageCause, damageAmount);
                                 cmdBuf.invoke(targetRef, damageEvent);
+                            }
+
+                            if (onImpactCallback != null) {
+                                onImpactCallback.accept(hitPos);
                             }
 
                             cmdBuf.removeEntity(ref, RemoveReason.REMOVE);

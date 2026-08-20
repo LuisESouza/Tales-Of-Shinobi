@@ -18,5 +18,7 @@ public interface Jutsu {
         return getChakraCost();
     }
 
+    default SkillType getType() { return SkillType.NINJUTSU; }
+
     void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world);
 }

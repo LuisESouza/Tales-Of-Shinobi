@@ -8,15 +8,18 @@ import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WeatherUtils {
 
-    private static final Set<UUID> activeSharinganPlayers = new HashSet<>();
+    private static final Map<UUID, String> activePlayerWeathers = new ConcurrentHashMap<>();
 
-    public void applyPlayerWeather(PlayerRef playerRef, PacketHandler packetHandler, String weatherId) {
+    /**
+     * Aplica um override de clima genérico ao jogador.
+     */
+    public static void applyPlayerWeather(PlayerRef playerRef, PacketHandler packetHandler, String weatherId) {
         if (playerRef == null || packetHandler == null || weatherId == null || weatherId.isEmpty()) return;
 
         Ref<EntityStore> ref = playerRef.getReference();
@@ -28,7 +31,7 @@ public class WeatherUtils {
 
             int weatherIndex = assetMap.getIndex(weatherId);
             if (weatherIndex < 0) {
-                System.err.println("[ClanManager] Clima com ID '" + weatherId + "' não encontrado no AssetMap.");
+                System.err.println("[WeatherUtils] Clima com ID '" + weatherId + "' não encontrado no AssetMap.");
                 return;
             }
 
@@ -37,24 +40,23 @@ public class WeatherUtils {
             packetHandler.tryFlush();
 
             if (playerRef.getUuid() != null) {
-                activeSharinganPlayers.add(playerRef.getUuid());
+                activePlayerWeathers.put(playerRef.getUuid(), weatherId);
             }
 
         } catch (Exception e) {
-            System.err.println("[ClanManager] Erro ao aplicar clima Sharingan: " + e.getMessage());
+            System.err.println("[WeatherUtils] Erro ao aplicar clima '" + weatherId + "': " + e.getMessage());
         }
     }
 
     /**
-     * Reseta o clima enviando o índice de um clima normal existente no jogo (ex: "Sun").
-     * NUNCA envie números negativos como -1.
+     * Reseta o clima do jogador enviando o clima padrão (ex: "Sun").
      */
-    public void resetPlayerWeather(PlayerRef playerRef, PacketHandler packetHandler, String defaultWeatherId) {
+    public static void resetPlayerWeather(PlayerRef playerRef, PacketHandler packetHandler, String defaultWeatherId) {
         if (playerRef == null || packetHandler == null) return;
 
         try {
             if (playerRef.getUuid() != null) {
-                activeSharinganPlayers.remove(playerRef.getUuid());
+                activePlayerWeathers.remove(playerRef.getUuid());
             }
 
             IndexedLookupTableAssetMap<String, Weather> assetMap = Weather.getAssetMap();
@@ -72,11 +74,23 @@ public class WeatherUtils {
             packetHandler.tryFlush();
 
         } catch (Exception e) {
-            System.err.println("[ClanManager] Erro ao resetar clima do jogador: " + e.getMessage());
+            System.err.println("[WeatherUtils] Erro ao resetar clima do jogador: " + e.getMessage());
         }
     }
 
-    public static boolean hasSharinganActive(UUID playerUuid) {
-        return activeSharinganPlayers.contains(playerUuid);
+    /**
+     * Verifica se o jogador está sob o efeito de um clima específico.
+     */
+    public static boolean hasWeatherActive(UUID playerUuid, String weatherId) {
+        if (playerUuid == null || weatherId == null) return false;
+        return weatherId.equals(activePlayerWeathers.get(playerUuid));
+    }
+
+    /**
+     * Retorna o clima customizado ativo atualmente no jogador, se houver.
+     */
+    public static String getActiveWeather(UUID playerUuid) {
+        if (playerUuid == null) return null;
+        return activePlayerWeathers.get(playerUuid);
     }
 }

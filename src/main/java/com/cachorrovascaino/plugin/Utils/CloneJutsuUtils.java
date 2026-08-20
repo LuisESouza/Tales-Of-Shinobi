@@ -32,19 +32,6 @@ public class CloneJutsuUtils {
 
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
-    /**
-     * Spawna um clone do jogador clonando suas aparências e propriedades.
-     *
-     * @param playerRef     Ref do jogador invocador
-     * @param playerEntityRef Ref da entidade do jogador
-     * @param store         Store da entidade
-     * @param world         Mundo do Hytale
-     * @param offsetX       Offset de spawn no eixo X (ex: 1.5)
-     * @param offsetZ       Offset de spawn no eixo Z (ex: 1.5)
-     * @param durationSec   Duração do clone em segundos antes de despawnar
-     * @param roleName      Role de NPC configurada no servidor (ex: "ShadowClone")
-     * @param castMessage   Mensagem opcional exibida ao invocar
-     */
     public static Ref<EntityStore> spawnClone(
             PlayerRef playerRef,
             Ref<EntityStore> playerEntityRef,
@@ -127,6 +114,28 @@ public class CloneJutsuUtils {
         }
 
         return cloneRef;
+    }
+
+    /**
+     * Força a atração de combate do clone para qualquer entidade (Player ou Mob),
+     * ignorando travas de facção/proprietário.
+     */
+    public static void forceCloneAttack(Ref<EntityStore> cloneRef, Ref<EntityStore> victimRef, Store<EntityStore> store) {
+        if (cloneRef == null || victimRef == null || !cloneRef.isValid() || !victimRef.isValid()) return;
+
+        NPCEntity npc = store.getComponent(cloneRef, NPCEntity.getComponentType());
+        if (npc == null) return;
+
+        npc.onFlockSetTarget("target", victimRef);
+        npc.onFlockSetTarget("combat_target", victimRef);
+        npc.onFlockSetTarget("enemy", victimRef);
+        npc.onFlockSetTarget("hostile", victimRef);
+
+        if (npc.getRole() != null) {
+            if (npc.getRole().getStateSupport() != null) {
+                npc.getRole().getStateSupport().setState(cloneRef, "Combat", "Attacking", store);
+            }
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

@@ -1,6 +1,7 @@
-package com.cachorrovascaino.plugin.Features.Jutsu;
+package com.cachorrovascaino.plugin.Features.Ninjutsu;
 
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
@@ -18,6 +19,8 @@ public class WaterWalkJutsu implements Jutsu {
     @Override public String getDisplayName() { return "Suiton: Mizu Kinobori"; }
     @Override public float getChakraCost() { return 15.0f; }
     @Override public float getCooldown() { return 1.0f; }
+    @Override public SkillType getType() {return SkillType.NINJUTSU;}
+
 
     @Override
     public void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world) {

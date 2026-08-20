@@ -1,22 +1,32 @@
 package com.cachorrovascaino.plugin.Manager;
 
+import com.cachorrovascaino.plugin.Abstractions.Jutsu;
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
-import com.cachorrovascaino.plugin.Features.Jutsu.DotonWallJutsu;
-import com.cachorrovascaino.plugin.Features.Jutsu.fire.FireBallJutsu;
-import com.cachorrovascaino.plugin.Abstractions.Jutsu;
-import com.cachorrovascaino.plugin.Features.Jutsu.ShadowCloneJutsu;
-import com.cachorrovascaino.plugin.Features.Jutsu.SubstitutionJutsu;
-import com.cachorrovascaino.plugin.Features.Jutsu.fire.MeteoroJutsu;
-import com.cachorrovascaino.plugin.Features.Jutsu.water.WaterBallJutsu;
+import com.cachorrovascaino.plugin.Features.Genjutsu.KasumiJushi;
+import com.cachorrovascaino.plugin.Features.Genjutsu.Kokuangyo;
+import com.cachorrovascaino.plugin.Features.Genjutsu.NehanShojo;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.DotonWallJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.ShadowCloneJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.SubstitutionJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.FireBallJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.MeteoroJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.heal.HealJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.water.WaterBallJutsu;
+import com.cachorrovascaino.plugin.Features.Taijutsu.LeafHurricane;
+import com.cachorrovascaino.plugin.Features.Taijutsu.LionCombo;
+import com.cachorrovascaino.plugin.Features.Taijutsu.PrimaryLotus;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Ui.Hud.ChakraHud;
 import com.cachorrovascaino.plugin.Ui.Hud.ComboHud;
 import com.cachorrovascaino.plugin.Utils.ChakraUtils;
+import com.cachorrovascaino.plugin.Utils.PlayerStatUtils;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -54,12 +64,24 @@ public class JutsuManager {
     }
 
     private void registerJutsus() {
+        // Ninjutsus
         registerJutsu(ShadowCloneJutsu.INSTANCE);
         registerJutsu(FireBallJutsu.INSTANCE);
         registerJutsu(SubstitutionJutsu.INSTANCE);
         registerJutsu(WaterBallJutsu.INSTANCE);
         registerJutsu(MeteoroJutsu.INSTANCE);
         registerJutsu(DotonWallJutsu.INSTANCE);
+        registerJutsu(HealJutsu.INSTANCE);
+
+        // Taijutsus
+        registerJutsu(LeafHurricane.INSTANCE);
+        registerJutsu(LionCombo.INSTANCE);
+        registerJutsu(PrimaryLotus.INSTANCE);
+
+        // Genjutsu
+        registerJutsu(Kokuangyo.INSTANCE);
+        registerJutsu(NehanShojo.INSTANCE);
+        registerJutsu(KasumiJushi.INSTANCE);
     }
 
     private void registerJutsu(Jutsu jutsu) {
@@ -264,26 +286,49 @@ public class JutsuManager {
             return;
         }
 
-        float jutsuCost = jutsu.getChakraCost(playerRef);
-        float currentChakra = ChakraUtils.getCurrentChakra(playerRef);
-
-        if (currentChakra < jutsuCost) {
-            playerRef.sendMessage(Message.raw("Insufficient chakra: " + (int) jutsuCost).color(Color.RED));
+        PlayerData playerData = plugin.getDataManager().getPlayerData(uuid);
+        if (playerData == null) {
             resetComboData(playerRef);
             return;
         }
 
         Ref<EntityStore> ref = playerRef.getReference();
-        if (ref == null || !ref.isValid()) return;
-
+        if (ref == null || !ref.isValid()) {
+            resetComboData(playerRef);
+            return;
+        }
         Store<EntityStore> store = ref.getStore();
+
+        float resourceCost = jutsu.getChakraCost(playerRef);
+
+        if (jutsu.getType() == SkillType.TAIJUTSU) {
+            float currentStamina = PlayerStatUtils.getValue(store, ref, DefaultEntityStatTypes.getStamina());
+
+            if (currentStamina < resourceCost) {
+                playerRef.sendMessage(Message.raw("Insufficient stamina: " + (int) resourceCost).color(Color.RED));
+                resetComboData(playerRef);
+                return;
+            }
+
+            if (resourceCost > 0) {
+                PlayerStatUtils.consumeStamina(store, ref, DefaultEntityStatTypes.getStamina(), resourceCost);
+            }
+        } else {
+            float currentChakra = ChakraUtils.getCurrentChakra(playerRef);
+            if (currentChakra < resourceCost) {
+                playerRef.sendMessage(Message.raw("Insufficient chakra: " + (int) resourceCost).color(Color.RED));
+                resetComboData(playerRef);
+                return;
+            }
+
+            if (resourceCost > 0) {
+                ChakraUtils.consumeChakra(playerRef, resourceCost);
+                updateChakraHud(playerRef);
+            }
+        }
+
         EntityStore entityStore = store.getExternalData();
         World world = entityStore.getWorld();
-
-        if (jutsuCost > 0) {
-            ChakraUtils.consumeChakra(playerRef, jutsuCost);
-            updateChakraHud(playerRef);
-        }
 
         jutsu.execute(playerRef, ref, store, world);
 
@@ -292,14 +337,10 @@ public class JutsuManager {
             Main.getCooldownManager().setCooldown(uuid, jutsuId, jutsuType.getCooldown());
         }
 
-        PlayerData playerData = plugin.getDataManager().getPlayerData(uuid);
-        if (playerData != null) {
-            boolean leveledUp = playerData.addJutsuXp(jutsuId, 15.0f);
-
-            if (leveledUp) {
-                int newLvl = playerData.getJutsuLevel(jutsuId);
-                playerRef.sendMessage(Message.raw("Your jutsu [" + jutsu.getDisplayName() + "] up to the level of " + newLvl + "!").color(Color.YELLOW));
-            }
+        boolean leveledUp = playerData.addJutsuXp(jutsuId, 15.0f);
+        if (leveledUp) {
+            int newLvl = playerData.getJutsuLevel(jutsuId);
+            playerRef.sendMessage(Message.raw("Your jutsu [" + jutsu.getDisplayName() + "] up to the level of " + newLvl + "!").color(Color.YELLOW));
         }
 
         String formattedSequence = currentCombo.replace("L", "M1").replace("R", "F").replace("-", " -> ");
@@ -357,11 +398,6 @@ public class JutsuManager {
         }
     }
 
-    /**
-     * FIX: novo método, package-private. Limpa o estado do combo (sem mandar mensagem de
-     * "combo reset" nem esconder o HUD) - usado depois que um combo foi executado com
-     * SUCESSO (jutsu normal ou, agora, jutsu/transformação de clã via ClanManager).
-     */
     void clearComboState(PlayerRef playerRef) {
         if (playerRef == null) return;
         UUID uuid = playerRef.getUuid();

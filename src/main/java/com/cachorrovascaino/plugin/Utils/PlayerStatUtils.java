@@ -28,6 +28,18 @@ public final class PlayerStatUtils {
         this.uuid = playerRef.getUuid();
     }
 
+    public static void healDirectly(Store<EntityStore> store, Ref<EntityStore> ref, float amount) {
+        int healthIndex = DefaultEntityStatTypes.getHealth();
+        EntityStatMap statMap = store.getComponent(ref, EntityStatMap.getComponentType());
+        if (statMap != null) {
+            EntityStatValue health = statMap.get(healthIndex);
+            if (health != null) {
+                float newHealth = Math.min(health.getMax(), health.get() + amount);
+                statMap.setStatValue(healthIndex, newHealth);
+            }
+        }
+    }
+
     // ============================================================
     // CONSULTA DE DADOS NATIVOS (GETTERS)
     // ============================================================

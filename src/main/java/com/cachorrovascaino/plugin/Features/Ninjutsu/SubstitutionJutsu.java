@@ -1,6 +1,7 @@
-package com.cachorrovascaino.plugin.Features.Jutsu;
+package com.cachorrovascaino.plugin.Features.Ninjutsu;
 
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
@@ -25,23 +26,18 @@ public class SubstitutionJutsu implements Jutsu {
     private static final float COST_PER_LEVEL = 4.0f;
     private static final double TELEPORT_DISTANCE = 8.0;
 
-    @Override
-    public String getId() {
+    @Override public String getId() {
         return "substitution_jutsu";
     }
-
-    @Override
-    public String getDisplayName() {
+    @Override public String getDisplayName() {
         return "Kawarimi no Jutsu";
     }
-
-    @Override
-    public float getChakraCost() {
-        return JutsuType.SUBSTITUTION.getChakraCost();
+    @Override public float getChakraCost() {
+        return JutsuType.SUBSTITUTION.getResourceCost();
     }
+    @Override public float getCooldown() {return JutsuType.SUBSTITUTION.getCooldown();}
+    @Override public SkillType getType() {return SkillType.NINJUTSU;}
 
-    @Override
-    public float getCooldown() {return JutsuType.SUBSTITUTION.getCooldown();}
 
     @Override
     public float getChakraCost(PlayerRef playerRef) {

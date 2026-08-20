@@ -1,6 +1,7 @@
-package com.cachorrovascaino.plugin.Features.Jutsu.water;
+package com.cachorrovascaino.plugin.Features.Ninjutsu.water;
 
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
@@ -18,23 +19,18 @@ public class WaterBallJutsu implements Jutsu {
     private static final float DAMAGE_PER_LEVEL = 7.0f;
     private static final float COST_PER_LEVEL = 4.0f;
 
-    @Override
-    public String getId() {
+    @Override public String getId() {
         return "waterball_jutsu";
     }
-
-    @Override
-    public String getDisplayName() {
+    @Override public String getDisplayName() {
         return "Suiton: Suiryūdan no Jutsu";
     }
-
-    @Override
-    public float getChakraCost() {
-        return JutsuType.WATERBALL.getChakraCost();
+    @Override public float getChakraCost() {
+        return JutsuType.WATERBALL.getResourceCost();
     }
+    @Override public float getCooldown() {return 0;}
+    @Override public SkillType getType() {return SkillType.NINJUTSU;}
 
-    @Override
-    public float getCooldown() {return 0;}
 
     @Override
     public float getChakraCost(PlayerRef playerRef) {

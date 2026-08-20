@@ -1,20 +1,125 @@
-// Hytale UI Definition: GenjutsuSKill
-// Controller: GenjutsuSKillController.java
+$C = "../../../Common.ui";
 
 Group #GenjutsuSKillRoot {
-  Anchor: (Width: 400, Height: 300);
-  Background: #1a1a2e(0.95);
-  LayoutMode: Top;
-  Padding: (Full: 16);
+    LayoutMode: Left;
+    Anchor: (Width: 560, Height: 96, Top: 6);
+    Background: (TexturePath: "../../../Common/ContainerPanelPatch.png", Border: 4);
+    Padding: (Full: 6);
 
-  Label #Title {
-    Text: "GenjutsuSKill";
-    Anchor: (Height: 32);
-    Style: (
-      FontSize: 18,
-      TextColor: #ffffff,
-      RenderBold: true,
-      HorizontalAlignment: Center
-    );
-  }
+    // --- ÍCONE DO Genjutsu ---
+    Group #GenjutsuIconContainer {
+        Anchor: (Width: 54, Height: 84);
+        Background: #000000(0.5);
+
+        Group #GenjutsuIcon {
+            Anchor: (Width: 48, Height: 48, Top: 18, Left: 3);
+        }
+    }
+
+    // --- INFORMAÇÕES E DETALHES ---
+    Group #GenjutsuInfo {
+        LayoutMode: Top;
+        Anchor: (Left: 10, Width: 385, Height: 84);
+
+        // Cabeçalho: Nome e Tipo
+        Group #RowHeader {
+            LayoutMode: Left;
+            Anchor: (Height: 20);
+
+            Label #LabelGenjutsuName {
+                Anchor: (Height: 20);
+                Text: "Genjutsu Name";
+                Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, RenderBold: true, FontSize: 13, VerticalAlignment: Center);
+            }
+
+            Label #LabelGenjutsuType {
+                Anchor: (Left: 8, Height: 20);
+                Text: "[Genjutsu]";
+                Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #E65100, VerticalAlignment: Center);
+            }
+        }
+
+        // Linha Secundária: Badges / Chips de Atributos e Progresso
+        Group #ColumnItems {
+            LayoutMode: Top;
+            Anchor: (Top: 6);
+
+            // Linha 1: Custo de Stamina & Nível Atual
+            Group #RowItems1 {
+                LayoutMode: Left;
+                Anchor: (Height: 18);
+
+                Group #ChipCost {
+                    LayoutMode: Left;
+                    Background: #000000(0.35);
+                    Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+
+                    Label #LabelGenjutsuCost {
+                        Text: "Genjutsu: 20";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #4CAF50, RenderBold: true, VerticalAlignment: Center);
+                    }
+                }
+
+                Group #ChipLevel {
+                    LayoutMode: Left;
+                    Anchor: (Left: 6);
+                    Background: #000000(0.35);
+                    Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+
+                    Label #LabelGenjutsuLevel {
+                        Text: "Lv. 1";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #50E3C2, RenderBold: true, VerticalAlignment: Center);
+                    }
+                }
+            }
+
+            // Linha 2: XP Atual e Requisitos
+            Group #RowItems2 {
+                LayoutMode: Left;
+                Anchor: (Top: 4, Height: 18);
+
+                Group #ChipXp {
+                    LayoutMode: Left;
+                    Background: #000000(0.35);
+                    Padding: (Left: 6, Right: 6, Top: 2, Bottom: 2);
+
+                    Label #LabelGenjutsuXp {
+                        Text: "XP: 0/50";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #F5A623, VerticalAlignment: Center);
+                    }
+                }
+
+                Group #ChipReq {
+                    LayoutMode: Left;
+                    Anchor: (Left: 6);
+
+                    Label #LabelGenjutsuReq {
+                        Background: #000000(0.35);
+                        Padding: (Left: 6, Right: 6, Top: 4, Bottom: 4);
+                        Text: "";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #d0d2d6, VerticalAlignment: Center);
+                    }
+
+                    Label #LabelNinjutsuReq {
+                        Background: #000000(0.35);
+                        Padding: (Left: 6, Right: 6, Top: 4, Bottom: 4);
+                        Anchor: (Left: 5);
+                        Text: "";
+                        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #d0d2d6, VerticalAlignment: Center);
+                    }
+                }
+            }
+        }
+    }
+
+    // --- BOTÃO DE AÇÃO ---
+    Group #GenjutsuAction {
+        LayoutMode: Left;
+        Anchor: (Width: 90, Height: 84);
+
+        $C.@SmallSecondaryTextButton #BtnGenjutsuAction {
+            @Text = "APRENDER";
+            Anchor: (Width: 90, Height: 30, Top: 27);
+        }
+    }
 }

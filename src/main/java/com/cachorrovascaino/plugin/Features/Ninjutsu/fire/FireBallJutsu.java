@@ -1,6 +1,7 @@
-package com.cachorrovascaino.plugin.Features.Jutsu.fire;
+package com.cachorrovascaino.plugin.Features.Ninjutsu.fire;
 
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
@@ -18,23 +19,15 @@ public class FireBallJutsu implements Jutsu {
     private static final float DAMAGE_PER_LEVEL = 7.0f;
     private static final float COST_PER_LEVEL = 4.0f;
 
-    @Override
-    public String getId() {
+    @Override public String getId() {
         return "fireball_jutsu";
     }
-
-    @Override
-    public String getDisplayName() {
+    @Override public String getDisplayName() {
         return "Katon: Gōkakyū no Jutsu";
     }
-
-    @Override
-    public float getChakraCost() {
-        return JutsuType.FIREBALL.getChakraCost();
-    }
-
-    @Override
-    public float getCooldown(){ return 0;}
+    @Override public float getChakraCost() {return JutsuType.FIREBALL.getResourceCost();}
+    @Override public float getCooldown(){ return JutsuType.FIREBALL.getCooldown();}
+    @Override public SkillType getType() {return SkillType.NINJUTSU;}
 
     @Override
     public float getChakraCost(PlayerRef playerRef) {

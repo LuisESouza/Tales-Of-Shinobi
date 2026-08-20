@@ -1,5 +1,6 @@
 package com.cachorrovascaino.plugin.Ui.Page;
 
+import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Data.Clan.ClanType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
@@ -39,8 +40,11 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
 
     private static final String INTERFACE_MAIN = "Shinobi/Menus/SkillsMenu.ui";
     public static final String NINJUTSU_CARD_TEMPLATE = "Shinobi/Components/skills/NinjutsuSkill.ui";
-    public static final String ClAN_NINJUTSU_TEMPLATE = "Shinobi/Components/skills/Clan/ClanNinjutsus.ui";
+    public static final String TAIJUTSU_CARD_TEMPLATE = "Shinobi/Components/skills/TaijutsuSkill.ui";
     public static final String CLAN_CARD_TEMPLATE = "Shinobi/Components/skills/ClanSkill.ui";
+    public static final String GENJUTSU_CARD_TEMPLATE = "Shinobi/Components/skills/GenjutsuSkill.ui";
+    public static final String ClAN_NINJUTSU_TEMPLATE = "Shinobi/Components/skills/Clan/ClanNinjutsus.ui";
+
 
     private static final Map<String, String> SKILLS_UI_MAP = Map.of(
             "Ninjutsu", "Shinobi/Components/skills/NinjutsuSkill.ui",
@@ -73,18 +77,19 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         String username = playerRef.getUsername();
 
         var player = Universe.get().getPlayer(uuid);
-        if (player != null) {username = player.getUsername();}
+        if (player != null) { username = player.getUsername(); }
 
         PlayerData data = dataManager.getPlayerData(uuid);
         if (data == null) { data = dataManager.loadPlayer(uuid, username); }
         if (data == null) { data = new PlayerData(username, uuid.toString()); }
-        if(!Objects.equals(currentTab, "Clan")){buildSlotsSkill(data, cmd);}
+
+        if (!Objects.equals(currentTab, "Clan")) {buildSlotsSkill(data, cmd);}
 
         buildButtons(evt);
 
-        if ("Ninjutsu".equalsIgnoreCase(currentTab)) {
-            buildComponentsNinjutsu(evt, cmd, data);
-        }
+        if ("Ninjutsu".equalsIgnoreCase(currentTab)) {buildComponentsNinjutsu(evt, cmd, data);}
+        if ("Taijutsu".equalsIgnoreCase(currentTab)) {buildComponentsTaijutsu(evt, cmd, data);}
+        if ("Genjutsu".equals(currentTab)) {buildComponentsGenjutsu(evt, cmd, data);}
         if ("Clan".equalsIgnoreCase(currentTab)) {
             buildComponentsClan(evt, cmd, data);
             buildSlotSkillClan(data, cmd);
@@ -103,8 +108,7 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         NavigationButtons.bindButtons(evt);
     }
 
-    // FIX: agora lê do hotbar de CLÃ (getEquippedClanHotbar), não do hotbar normal.
-    public void buildSlotSkillClan(@Nonnull PlayerData data, @Nonnull UICommandBuilder cmd){
+    public void buildSlotSkillClan(@Nonnull PlayerData data, @Nonnull UICommandBuilder cmd) {
         cmd.clear("#EquippedJutsusPanel");
         cmd.append("#EquippedJutsusPanel", "Shinobi/Components/slots/ClanSlot.ui");
 
@@ -207,10 +211,8 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
                     cmd.set(skillPath + " #LabelJutsuType.Text", "[" + playerClan.getDisplayName() + "]");
                     cmd.set(skillPath + " #LabelJutsuCost.Text", "Chakra: " + (int) skill.getChakraCost());
 
-                    //Requisitos para deslobquear
                     cmd.set(skillPath + " #LabelJutsuReq1.Text", "Ninj: " + skill.getRequiredNinjutsu());
                     cmd.set(skillPath + " #LabelJutsuReq2.Text", "Taij: " + skill.getRequiredTaijutsu());
-                    //
                     cmd.set(skillPath + " #LabelJutsuReq3.Text", "Genj: " + skill.getRequiredGenjutsu());
                     cmd.set(skillPath + " #LabelJutsuReq4.Text", "Skill: " + skill.getRequiredSkillId());
                     cmd.set(skillPath + " #LabelJutsuReq5.Text", "Chakra Max: " + skill.getRequiredMaxChakra());
@@ -246,15 +248,18 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
     public void buildComponentsNinjutsu(@Nonnull UIEventBuilder evt, @Nonnull UICommandBuilder cmd, @Nonnull PlayerData data) {
         cmd.clear("#SkillsContent");
 
-        List<JutsuType> allJutsus = Arrays.asList(JutsuType.values());
-        int totalPages = Math.max(1, (int) Math.ceil((double) allJutsus.size() / ITEMS_PER_PAGE));
+        List<JutsuType> ninjutsus = Arrays.stream(JutsuType.values())
+                .filter(j -> j.getType() == SkillType.NINJUTSU)
+                .toList();
+
+        int totalPages = Math.max(1, (int) Math.ceil((double) ninjutsus.size() / ITEMS_PER_PAGE));
         validateCurrentPage(totalPages);
 
         cmd.set("#LabelPagination.Text", (currentPage + 1) + "/" + totalPages);
 
         int start = currentPage * ITEMS_PER_PAGE;
-        int end = Math.min(start + ITEMS_PER_PAGE, allJutsus.size());
-        List<JutsuType> pageJutsus = allJutsus.subList(start, end);
+        int end = Math.min(start + ITEMS_PER_PAGE, ninjutsus.size());
+        List<JutsuType> pageJutsus = ninjutsus.subList(start, end);
 
         int renderIndex = 0;
         for (JutsuType jutsu : pageJutsus) {
@@ -264,7 +269,6 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
 
             boolean isUnlocked = data.hasJutsuUnlocked(jutsu.getId());
             boolean isEquipped = data.getEquippedHotbar() != null && data.getEquippedHotbar().containsValue(jutsu.getId());
-            boolean hasRequiredStat = data.getNinjutsu() >= jutsu.getRequiredNinjutsu();
 
             int jutsuLevel = data.getJutsuLevel(jutsu.getId());
             float currentXp = data.getJutsuXp(jutsu.getId());
@@ -273,13 +277,15 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
             cmd.set(basePath + " #LabelJutsuName.Text", jutsu.getName());
             cmd.set(basePath + " #LabelJutsuLevel.Text", "[Lv. " + jutsuLevel + "]");
             cmd.set(basePath + " #LabelJutsuType.Text", "[Ninjutsu]");
-            cmd.set(basePath + " #LabelJutsuCost.Text", "Chakra: " + (int) jutsu.getChakraCost());
+            cmd.set(basePath + " #LabelJutsuCost.Text", "Chakra: " + (int) jutsu.getResourceCost());
             cmd.set(basePath + " #LabelJutsuXp.Text", "XP: " + (int) currentXp + "/" + (int) requiredXp);
-            cmd.set(basePath + " #LabelJutsuReq.Text", "Req: Ninjutsu " + jutsu.getRequiredNinjutsu());
+            cmd.set(basePath + " #LabelJutsuReq.Text", "Ninj: " + jutsu.getReqNinjutsu());
+
+            boolean canUnlock = canUnlockJutsu(data, jutsu);
 
             String actionText = "LEARN";
             if (!isUnlocked) {
-                if (!hasRequiredStat) {
+                if (!canUnlock) {
                     actionText = "BLOCKED";
                 }
             } else {
@@ -291,6 +297,129 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
             evt.addEventBinding(
                     CustomUIEventBindingType.Activating,
                     basePath + " #BtnJutsuAction",
+                    new EventData().append("Action", "ToggleJutsu").append("Slot", jutsu.getId()),
+                    false
+            );
+
+            renderIndex++;
+        }
+    }
+
+    public void buildComponentsTaijutsu(@Nonnull UIEventBuilder evt, @Nonnull UICommandBuilder cmd, @Nonnull PlayerData data) {
+        cmd.clear("#SkillsContent");
+
+        List<JutsuType> taijutsus = Arrays.stream(JutsuType.values())
+                .filter(j -> j.getType() == SkillType.TAIJUTSU)
+                .toList();
+
+        int totalPages = Math.max(1, (int) Math.ceil((double) taijutsus.size() / ITEMS_PER_PAGE));
+        validateCurrentPage(totalPages);
+
+        cmd.set("#LabelPagination.Text", (currentPage + 1) + "/" + totalPages);
+
+        int start = currentPage * ITEMS_PER_PAGE;
+        int end = Math.min(start + ITEMS_PER_PAGE, taijutsus.size());
+        List<JutsuType> pageTaijutsus = taijutsus.subList(start, end);
+
+        int renderIndex = 0;
+        for (JutsuType jutsu : pageTaijutsus) {
+            cmd.append("#SkillsContent", TAIJUTSU_CARD_TEMPLATE);
+
+            String basePath = "#SkillsContent[" + renderIndex + "]";
+
+            boolean isUnlocked = data.hasJutsuUnlocked(jutsu.getId());
+            boolean isEquipped = data.getEquippedHotbar() != null && data.getEquippedHotbar().containsValue(jutsu.getId());
+
+            int jutsuLevel = data.getJutsuLevel(jutsu.getId());
+            float currentXp = data.getJutsuXp(jutsu.getId());
+            float requiredXp = jutsuLevel * 50.0f;
+
+            cmd.set(basePath + " #LabelTaijutsuName.Text", jutsu.getName());
+            cmd.set(basePath + " #LabelTaijutsuLevel.Text", "[Lv. " + jutsuLevel + "]");
+            cmd.set(basePath + " #LabelTaijutsuType.Text", "[Taijutsu]");
+            cmd.set(basePath + " #LabelTaijutsuCost.Text", "Stamina: " + (int) jutsu.getResourceCost());
+            cmd.set(basePath + " #LabelTaijutsuXp.Text", "XP: " + (int) currentXp + "/" + (int) requiredXp);
+            cmd.set(basePath + " #LabelTaijutsuReq.Text", "Taij: " + jutsu.getReqTaijutsu());
+            cmd.set(basePath + " #LabelStaminaReq.Text", "Stam: " + jutsu.getReqStamina());
+            cmd.set(basePath + " #LabelSpeedReq.Text", "Speed: " + jutsu.getReqSpeed());
+
+            boolean canUnlock = canUnlockJutsu(data, jutsu);
+
+            String actionText = "LEARN";
+            if (!isUnlocked) {
+                if (!canUnlock) {
+                    actionText = "BLOCKED";
+                }
+            } else {
+                actionText = isEquipped ? "UNEQUIP" : "EQUIP";
+            }
+
+            cmd.set(basePath + " #BtnTaijutsuAction.Text", actionText);
+
+            evt.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    basePath + " #BtnTaijutsuAction",
+                    new EventData().append("Action", "ToggleJutsu").append("Slot", jutsu.getId()),
+                    false
+            );
+
+            renderIndex++;
+        }
+    }
+
+    public void buildComponentsGenjutsu(@Nonnull UIEventBuilder evt, @Nonnull UICommandBuilder cmd, @Nonnull PlayerData data){
+        cmd.clear("#SkillsContent");
+
+        List<JutsuType> genjutsus = Arrays.stream(JutsuType.values())
+                .filter(j -> j.getType() == SkillType.GENJUTSU)
+                .toList();
+
+        int totalPages = Math.max(1, (int) Math.ceil((double) genjutsus.size() / ITEMS_PER_PAGE));
+        validateCurrentPage(totalPages);
+
+        cmd.set("#LabelPagination.Text", (currentPage + 1) + "/" + totalPages);
+
+        int start = currentPage * ITEMS_PER_PAGE;
+        int end = Math.min(start + ITEMS_PER_PAGE, genjutsus.size());
+        List<JutsuType> pageTaijutsus = genjutsus.subList(start, end);
+
+        int renderIndex = 0;
+        for (JutsuType jutsu : pageTaijutsus) {
+            cmd.append("#SkillsContent", GENJUTSU_CARD_TEMPLATE);
+
+            String basePath = "#SkillsContent[" + renderIndex + "]";
+
+            boolean isUnlocked = data.hasJutsuUnlocked(jutsu.getId());
+            boolean isEquipped = data.getEquippedHotbar() != null && data.getEquippedHotbar().containsValue(jutsu.getId());
+
+            int jutsuLevel = data.getJutsuLevel(jutsu.getId());
+            float currentXp = data.getJutsuXp(jutsu.getId());
+            float requiredXp = jutsuLevel * 50.0f;
+
+            cmd.set(basePath + " #LabelGenjutsuName.Text", jutsu.getName());
+            cmd.set(basePath + " #LabelGenjutsuLevel.Text", "[Lv. " + jutsuLevel + "]");
+            cmd.set(basePath + " #LabelGenjutsuType.Text", "[Genjutsu]");
+            cmd.set(basePath + " #LabelGenjutsuCost.Text", "Chakra: " + (int) jutsu.getResourceCost());
+            cmd.set(basePath + " #LabelGenjutsuXp.Text", "XP: " + (int) currentXp + "/" + (int) requiredXp);
+            cmd.set(basePath + " #LabelGenjutsuReq.Text", "Genj: " + jutsu.getReqGenjutsu());
+            cmd.set(basePath + " #LabelNinjutsuReq.Text", "Ninj: " + jutsu.getReqNinjutsu());
+
+            boolean canUnlock = canUnlockJutsu(data, jutsu);
+
+            String actionText = "LEARN";
+            if (!isUnlocked) {
+                if (!canUnlock) {
+                    actionText = "BLOCKED";
+                }
+            } else {
+                actionText = isEquipped ? "UNEQUIP" : "EQUIP";
+            }
+
+            cmd.set(basePath + " #BtnGenjutsuAction.Text", actionText);
+
+            evt.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    basePath + " #BtnGenjutsuAction",
                     new EventData().append("Action", "ToggleJutsu").append("Slot", jutsu.getId()),
                     false
             );
@@ -429,7 +558,11 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         if (targetJutsu == null) return;
 
         if (!data.hasJutsuUnlocked(jutsuId)) {
-            if (data.getNinjutsu() >= targetJutsu.getRequiredNinjutsu()) {
+            if (canUnlockJutsu(data, targetJutsu)) {
+                if (targetJutsu.getRequiredPoints() > 0) {
+                    data.setAvailablePoints(data.getAvailablePoints() - targetJutsu.getRequiredPoints());
+                }
+
                 data.getUnlockedJutsus().add(jutsuId);
                 dataManager.savePlayer(uuid);
             }
@@ -437,6 +570,19 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         }
 
         toggleHotbarEquip(data, hotbar, jutsuId, 4);
+    }
+
+    /**
+     * Verifica se o jogador atende a todos os requisitos individuais de atributos e pontos para aprender o Jutsu.
+     */
+    private boolean canUnlockJutsu(PlayerData data, JutsuType jutsu) {
+        return data.getTaijutsu() >= jutsu.getReqTaijutsu()
+                && data.getGenjutsu() >= jutsu.getReqGenjutsu()
+                && data.getNinjutsu() >= jutsu.getReqNinjutsu()
+                //&& data.getHealth() >= jutsu.getReqHealth()
+                && data.getSpeed() >= jutsu.getReqSpeed()
+                //&& data.getStamina() >= jutsu.getReqStamina()
+                && data.getAvailablePoints() >= jutsu.getRequiredPoints();
     }
 
     private void handleClanSkillAction(PlayerData data, String skillId) {
