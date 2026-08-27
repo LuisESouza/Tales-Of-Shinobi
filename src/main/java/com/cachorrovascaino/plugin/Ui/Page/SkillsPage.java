@@ -36,7 +36,7 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
     private String currentTab = "Ninjutsu";
 
     private int currentPage = 0;
-    private static final int ITEMS_PER_PAGE = 3;
+    private static final int ITEMS_PER_PAGE = 2;
 
     private static final String INTERFACE_MAIN = "Shinobi/Menus/SkillsMenu.ui";
     public static final String NINJUTSU_CARD_TEMPLATE = "Shinobi/Components/skills/NinjutsuSkill.ui";

@@ -16,8 +16,10 @@ public enum JutsuType {
 
     // TAIJUTSUS (Requer Taijutsu/Stamina/Speed, Custa Stamina)
     LEAF_HURRICANE("leaf_hurricane", "Leaf Hurricane", SkillType.TAIJUTSU, 10, 0, 0, 0, 5, 10, 5, 15.0f, 8),
-    LION_COMBO("lion_combo", "Shishi Rendan", SkillType.TAIJUTSU, 20, 0, 0, 0, 15, 50, 10, 25.0f, 10),
-    PRIMARY_LOTUS("primary_lotus", "Omote Renge", SkillType.TAIJUTSU, 35, 0, 0, 0, 40, 80, 10, 45.0f, 12),
+    DYNAMIC_ENTRY("dynamic_entry", "Dainamikku Entorī", SkillType.TAIJUTSU, 15, 0, 0, 0, 10, 20, 10, 15.0f, 8),
+    LION_COMBO("lion_combo", "Shishi Rendan", SkillType.TAIJUTSU, 25, 0, 0, 0, 15, 50, 10, 25.0f, 10),
+    PRIMARY_LOTUS("primary_lotus", "Omote Renge", SkillType.TAIJUTSU, 40, 0, 0, 0, 40, 80, 10, 45.0f, 12),
+
 
     // GENJUTSU
     KOKUANGYO("kokuangyo_genjutsu", "Kokuangyo", SkillType.GENJUTSU, 0, 20, 20, 0, 0, 0, 10, 45.0f, 12),

@@ -1,0 +1,11 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Genjutsu_AoE_Spawn_Circle",
+      "FixedRotation": true,
+      "StartDelay": 0.1
+    }
+  ],
+  "BoundingRadius": 10,
+  "IsImportant": true
+}

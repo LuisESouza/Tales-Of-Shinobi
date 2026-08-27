@@ -10,7 +10,9 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
+import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
@@ -74,7 +76,8 @@ public class LionCombo implements Jutsu {
     public void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world) {
         if (playerRef == null || playerEntityRef == null || !playerEntityRef.isValid()) return;
 
-        playerRef.sendMessage(Message.raw(" Shishirendan Ativado! (" + DURATION_SECONDS + "s)").color(Color.ORANGE));
+        playerRef.sendMessage(Message.raw(" Shishirendan Activated! (" + DURATION_SECONDS + "s)").color(Color.ORANGE));
+        AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, "Kick", true, store);
 
         long startTime = System.currentTimeMillis();
         long durationMs = DURATION_SECONDS * 1000L;

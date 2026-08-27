@@ -5,6 +5,7 @@ import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Ui.Hud.JutsuEquippedHud;
 import com.cachorrovascaino.plugin.Ui.Hud.LevelHud;
 import com.cachorrovascaino.plugin.Utils.ChakraUtils;
+import com.cachorrovascaino.plugin.Utils.PlayerStatUtils;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.event.EventRegistry;
@@ -46,7 +47,7 @@ public class PlayerListener {
     public static void onPlayerReady(PlayerReadyEvent event) {
         Player player = event.getPlayer();
         Ref<EntityStore> ref = event.getPlayerRef();
-        World world = player != null ? player.getWorld() : null;
+        World world = player.getWorld();
 
         Store<EntityStore> entityStore = ref.getStore();
         PlayerRef pRef = entityStore.getComponent(ref, PlayerRef.getComponentType());
@@ -62,10 +63,17 @@ public class PlayerListener {
                 ChakraUtils.setChakra(pRef, playerData.getCurrentChakra());
             }
 
+            PlayerStatUtils.applyPlayerSpeed(
+                    entityStore,
+                    ref,
+                    pRef,
+                    playerData.getSpeed()
+            );
+
             if (world != null) {
-                CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS, world).execute(() -> {
+                CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS, world).execute(() -> {
                     try {
-                        if (pRef.isValid()) {
+                        if (pRef.isValid() && ref.isValid()) {
                             Main.getJutsuManager().ensureChakraHudLoaded(pRef);
                             Main.getJutsuManager().updateChakraHud(pRef);
 
@@ -75,7 +83,7 @@ public class PlayerListener {
                             }
                         }
                     } catch (Exception e) {
-                        LOGGER.atWarning().log("Erro ao inicializar HUDs no PlayerReady: " + e.getMessage());
+                        LOGGER.atWarning().log("Erro ao inicializar HUDs e Stats no PlayerReady: " + e.getMessage());
                     }
                 });
             }

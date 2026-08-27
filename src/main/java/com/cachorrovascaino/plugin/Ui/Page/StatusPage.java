@@ -105,7 +105,7 @@ public class StatusPage extends InteractiveCustomUIPage<StatusPage.UIEventData> 
         cmd.set("#LabelNinjutsu.Text", "Ninjutsu: " + data.getNinjutsu());
         cmd.set("#LabelTaijutsu.Text", "Taijutsu: " + data.getTaijutsu());
         cmd.set("#LabelGenjutsu.Text", "Genjutsu: " + data.getGenjutsu());
-        cmd.set("#LabelChakraControl.Text", "Chakra Control: " + data.getChakraControl());
+        cmd.set("#LabelChakraControl.Text", "Chakra Ctrl: " + data.getChakraControl());
     }
 
     public void buildButtons(UIEventBuilder evt) {

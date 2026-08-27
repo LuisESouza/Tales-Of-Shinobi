@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 public class Main extends JavaPlugin {
 
@@ -78,8 +79,6 @@ public class Main extends JavaPlugin {
         clanManager = new ClanManager(this);
         cooldownManager = new CooldownManager();
 
-        CHAKRA_STAT_INDEX = EntityStatType.getAssetMap().getIndex("Chakra");
-
         this.getCodecRegistry(CosmeticAsset.CODEC)
                 .register(Priority.NORMAL, "PlayerModel", PlayerModelCosmetic.class, PlayerModelCosmetic.CODEC)
                 .register(Priority.NORMAL, "EyeAttachment", EyeAttachmentCosmetic.class, EyeAttachmentCosmetic.CODEC);
@@ -103,6 +102,8 @@ public class Main extends JavaPlugin {
     public static JutsuManager getJutsuManager() { return jutsuManager; }
     public static CooldownManager getCooldownManager(){ return cooldownManager; }
     public static ClanManager getClanManager() { return clanManager; }
+    public static EyesUtils getEyesUtils() { return eyesUtils; }
+    public static WeatherUtils getWeatherUtils() { return weatherUtils; }
 
     public void RegisterCommand() {
         this.getCommandRegistry().registerCommand(new CommandMenu());
@@ -110,7 +111,7 @@ public class Main extends JavaPlugin {
     }
 
     public void RegisterSystem(){
-        this.getEntityStoreRegistry().registerSystem(new ComboTickSystem(getJutsuManager(), dataManager, eyesUtils, weatherUtils));
+        this.getEntityStoreRegistry().registerSystem(new ComboTickSystem(getJutsuManager(), getDataManager(), getEyesUtils(), getWeatherUtils()));
         this.getEntityStoreRegistry().registerSystem(new DamageTrackingSystem(this.lastAttackers));
         this.getEntityStoreRegistry().registerSystem(new DeathDetectionSystem(this.lastAttackers, this.deathMarkerType));
     }
@@ -122,6 +123,12 @@ public class Main extends JavaPlugin {
 
     @Override
     protected void start() {
+        try {
+            CHAKRA_STAT_INDEX = EntityStatType.getAssetMap().getIndex("Chakra");
+        } catch (Exception e) {
+            this.getLogger().at(Level.WARNING).log("Não foi possível registrar o índice do Stat 'Chakra'. Verifique seus assets.", e);
+        }
+
         System.out.println("===========================================");
         System.out.println("         NARUTO MOD INITIALIZED            ");
         System.out.println("===========================================");

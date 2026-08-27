@@ -24,7 +24,7 @@ public class MangekyouJutsu implements ClanJutsu {
 
     public static final MangekyouJutsu INSTANCE = new MangekyouJutsu();
 
-    private static final String MANGEKYOU_EYE_ASSET = "Mangekyo_Sharingan_Shisui_HD";
+    private static final String MANGEKYOU_EYE_ASSET = "Mangekyo_Sharingan_Obito_HD";
 
     private final EyesUtils eyesUtils = new EyesUtils();
 

@@ -10,9 +10,7 @@ import javax.annotation.Nonnull;
 
 public final class PlayerMovementUtils {
 
-    private PlayerMovementUtils() {
-        // Construtor privado para evitar instanciação de classe utilitária
-    }
+    private PlayerMovementUtils() {}
 
     /**
      * Congela completamente a movimentação do jogador (andado, corrida, pulo e agachamento).

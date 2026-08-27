@@ -123,7 +123,7 @@ public class LeafHurricane implements Jutsu {
                 e.printStackTrace();
             }
 
-            playerRef.sendMessage(Message.raw(" Konoha Senpū! Entidades atingidas: " + targetsHit).color(Color.GREEN));
+            playerRef.sendMessage(Message.raw(" Konoha Senpū! Affected entities: " + targetsHit).color(Color.GREEN));
         });
     }
 

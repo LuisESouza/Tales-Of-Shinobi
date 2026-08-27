@@ -1,25 +1,21 @@
 $C = "../../../Common.ui";
 
+@SecondaryButton = TextButtonStyle(
+  Default: (LabelStyle: (FontSize: 14, TextColor: #CCCCCC, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (LabelStyle: (FontSize: 15, TextColor: $C.@ColorGoldHighlight, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (LabelStyle: (FontSize: 14, TextColor: #CCCCCC, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
 Group #GenjutsuSKillRoot {
     LayoutMode: Left;
-    Anchor: (Width: 560, Height: 96, Top: 6);
+    Anchor: (Width: 400, Height: 96, Top: 6);
     Background: (TexturePath: "../../../Common/ContainerPanelPatch.png", Border: 4);
     Padding: (Full: 6);
-
-    // --- ÍCONE DO Genjutsu ---
-    Group #GenjutsuIconContainer {
-        Anchor: (Width: 54, Height: 84);
-        Background: #000000(0.5);
-
-        Group #GenjutsuIcon {
-            Anchor: (Width: 48, Height: 48, Top: 18, Left: 3);
-        }
-    }
 
     // --- INFORMAÇÕES E DETALHES ---
     Group #GenjutsuInfo {
         LayoutMode: Top;
-        Anchor: (Left: 10, Width: 385, Height: 84);
+        Anchor: (Left: 10, Width: 270, Height: 84);
 
         // Cabeçalho: Nome e Tipo
         Group #RowHeader {
@@ -117,9 +113,16 @@ Group #GenjutsuSKillRoot {
         LayoutMode: Left;
         Anchor: (Width: 90, Height: 84);
 
-        $C.@SmallSecondaryTextButton #BtnGenjutsuAction {
-            @Text = "APRENDER";
+        TextButton #BtnGenjutsuAction{
+            Text: "";
             Anchor: (Width: 90, Height: 30, Top: 27);
+            Background: (PatchStyle(TexturePath: "../../Assets/BgButton2.png"));
+            Style: @SecondaryButton;
         }
+
+//        $C.@SmallSecondaryTextButton #BtnGenjutsuAction {
+//            @Text = "APRENDER";
+//            Anchor: (Width: 90, Height: 30, Top: 27);
+//        }
     }
 }

@@ -17,8 +17,12 @@ public enum AttributeType {
     STAMINA("stamina", (context) ->
             PlayerStatUtils.increaseMaxStamina(context.store, context.ref, 10)),
 
-    SPEED("speed", (context) ->
-            context.data.setSpeed(context.data.getSpeed() + 1)),
+    SPEED("speed", (context) -> {
+        int newSpeedLevel = context.data.getSpeed() + 1;
+        context.data.setSpeed(newSpeedLevel);
+
+        PlayerStatUtils.applyPlayerSpeed(context.store, context.ref, context.playerRef, newSpeedLevel);
+    }),
 
     CHAKRA("chakra", (context) -> {
         float newMax = context.data.getMaxChakra() + 20.0f;

@@ -4,6 +4,8 @@ import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Manager.PlayerDataManager;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.MovementSettings;
+import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
@@ -116,6 +118,32 @@ public final class PlayerStatUtils {
             float gasto = stat.getMax() * percentual;
             float novaValue = Math.max(minValue, stat.get() - gasto);
             statMap.setStatValue(index, novaValue);
+        }
+    }
+
+    public static final float BASE_HYTALE_SPEED = 5.5f;
+    public static final float SPEED_PERCENT_PER_LEVEL = 0.002f;
+
+    public static void applyPlayerSpeed(Store<EntityStore> store, Ref<EntityStore> ref, PlayerRef playerRef, int speedLevel) {
+        if (playerRef == null || ref == null || !ref.isValid()) return;
+
+        float newBaseSpeed = BASE_HYTALE_SPEED * (1.0f + ((speedLevel - 1) * SPEED_PERCENT_PER_LEVEL));
+
+        MovementManager movementManager = store.getComponent(ref, MovementManager.getComponentType());
+        if (movementManager != null) {
+            MovementSettings currentSettings = movementManager.getSettings();
+            if (currentSettings != null) {
+                currentSettings.baseSpeed = newBaseSpeed;
+            }
+
+            MovementSettings defaultSettings = movementManager.getDefaultSettings();
+            if (defaultSettings != null) {
+                defaultSettings.baseSpeed = newBaseSpeed;
+            }
+
+            if (playerRef.getPacketHandler() != null) {
+                movementManager.update(playerRef.getPacketHandler());
+            }
         }
     }
 }

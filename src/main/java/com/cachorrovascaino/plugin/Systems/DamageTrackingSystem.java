@@ -1,5 +1,6 @@
 package com.cachorrovascaino.plugin.Systems;
 
+import com.cachorrovascaino.plugin.Main;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
@@ -32,7 +33,7 @@ public class DamageTrackingSystem extends DamageEventSystem {
     public void handle(int index, @Nonnull ArchetypeChunk<EntityStore> chunk, @Nonnull Store<EntityStore> store, @Nonnull CommandBuffer<EntityStore> commandBuffer, @Nonnull Damage damage) {
         Ref<EntityStore> targetRef = chunk.getReferenceTo(index);
 
-        if (targetRef == null || !targetRef.isValid() || damage.getMetaObject(RPG_DAMAGE_PROCESSED)) return;
+        if (!targetRef.isValid() || damage.getMetaObject(RPG_DAMAGE_PROCESSED)) return;
 
         Ref<EntityStore> attackerRef = null;
         if (damage.getSource() instanceof Damage.EntitySource src) {
@@ -50,6 +51,14 @@ public class DamageTrackingSystem extends DamageEventSystem {
 
         UUID attackerUUID = attackerUuidComp.getUuid();
         UUID targetUUID = targetUuidComp.getUuid();
+
+        int taijutsu = Main.getDataManager().getPlayerData(attackerUUID).getTaijutsu();
+
+        if(taijutsu > 0 && damage.getAmount() > 0.0f){
+            float taijutsuBonus = taijutsu * 2.5f;
+            float taijutsuNow = damage.getAmount();
+            damage.setAmount(taijutsuNow + taijutsuBonus);
+        }
 
         this.lastAttackers.put(targetUUID, attackerUUID);
     }

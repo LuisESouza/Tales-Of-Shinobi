@@ -39,9 +39,8 @@ public class WeatherUtils {
             packetHandler.write(packet);
             packetHandler.tryFlush();
 
-            if (playerRef.getUuid() != null) {
-                activePlayerWeathers.put(playerRef.getUuid(), weatherId);
-            }
+            activePlayerWeathers.put(playerRef.getUuid(), weatherId);
+
 
         } catch (Exception e) {
             System.err.println("[WeatherUtils] Erro ao aplicar clima '" + weatherId + "': " + e.getMessage());
@@ -55,9 +54,7 @@ public class WeatherUtils {
         if (playerRef == null || packetHandler == null) return;
 
         try {
-            if (playerRef.getUuid() != null) {
-                activePlayerWeathers.remove(playerRef.getUuid());
-            }
+            activePlayerWeathers.remove(playerRef.getUuid());
 
             IndexedLookupTableAssetMap<String, Weather> assetMap = Weather.getAssetMap();
 

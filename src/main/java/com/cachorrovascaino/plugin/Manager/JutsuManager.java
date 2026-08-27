@@ -14,6 +14,7 @@ import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.FireBallJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.MeteoroJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.heal.HealJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.water.WaterBallJutsu;
+import com.cachorrovascaino.plugin.Features.Taijutsu.DynamicEntry;
 import com.cachorrovascaino.plugin.Features.Taijutsu.LeafHurricane;
 import com.cachorrovascaino.plugin.Features.Taijutsu.LionCombo;
 import com.cachorrovascaino.plugin.Features.Taijutsu.PrimaryLotus;
@@ -24,7 +25,9 @@ import com.cachorrovascaino.plugin.Utils.ChakraUtils;
 import com.cachorrovascaino.plugin.Utils.PlayerStatUtils;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -77,6 +80,7 @@ public class JutsuManager {
         registerJutsu(LeafHurricane.INSTANCE);
         registerJutsu(LionCombo.INSTANCE);
         registerJutsu(PrimaryLotus.INSTANCE);
+        registerJutsu(DynamicEntry.INSTANCE);
 
         // Genjutsu
         registerJutsu(Kokuangyo.INSTANCE);
@@ -153,11 +157,22 @@ public class JutsuManager {
     }
 
     public void startCharging(PlayerRef playerRef) {
-        if (playerRef == null) return;
+        PlayerData data = plugin.getDataManager().getPlayerData(playerRef.getUuid());
         UUID uuid = playerRef.getUuid();
 
         activePlayerRefs.put(uuid, playerRef);
         chargingPlayers.add(uuid);
+
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref != null && ref.isValid()) {
+            Store<EntityStore> store = ref.getStore();
+
+            data.getCurrentChakra();
+
+            if(data.getCurrentChakra() < data.getMaxChakra()){
+                AnimationUtils.playAnimation(ref, AnimationSlot.Action, "ChakraCharge", true, store);
+            }
+        }
     }
 
     public void stopCharging(PlayerRef playerRef) {
@@ -166,6 +181,14 @@ public class JutsuManager {
 
         if (chargingPlayers.remove(uuid)) {
             activePlayerRefs.remove(uuid);
+
+            Ref<EntityStore> ref = playerRef.getReference();
+            if (ref != null && ref.isValid()) {
+                Store<EntityStore> store = ref.getStore();
+
+                AnimationUtils.stopAnimation(ref, AnimationSlot.Action, true, store);
+                AnimationUtils.playAnimation(ref, AnimationSlot.Action, "Idle", true, store);
+            }
         }
     }
 

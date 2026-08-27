@@ -1,249 +1,286 @@
 $C = "../../Common.ui";
 
+@SecondaryButton = TextButtonStyle(
+  Default: (LabelStyle: (FontSize: 14, TextColor: #CCCCCC, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (LabelStyle: (FontSize: 15, TextColor: $C.@ColorGoldHighlight, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (LabelStyle: (FontSize: 14, TextColor: #CCCCCC, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
 Group {
-    Anchor: (Width: 940, Height: 520);
+    Anchor: (Width: 1040, Height: 800, Top: 180);
     LayoutMode: Top;
 
-    Group #NavigationContent{
-        Anchor: (Width: 940, Height: 50);
-        LayoutMode: Left;
+    Group #NavigationContent {
+        Anchor: (Width: 1040, Height: 50);
+        LayoutMode: Center;
     }
 
-    Group{
+    Group #MainContent {
+        Anchor: (Right: 20, Width: 940, Height: 590, Top: 2);
+        Background: PatchStyle(TexturePath: "../Assets/BgMain.png");
         LayoutMode: Left;
 
-        $C.@Container {
-            Anchor: (Right: 20, Width: 340);
-            #Title {
-                Group {
-                    LayoutMode: Left;
-                    $C.@Title { @Text = "SHINOBI"; }
+        // ================= PAINEL ESQUERDO (SHINOBI) =================
+        Group #ShinobiContainer {
+            Anchor: (Width: 340, Height: 520, Top: 70, Left: 20);
+            LayoutMode: Top;
+
+            Group #Title {
+                Anchor: (Width: 300, Height: 40);
+                LayoutMode: Center;
+
+                Label {
+                    Text: "SHINOBI";
+                    Style: (...$C.@DefaultLabelStyle, TextColor: #2A1A0A, RenderBold: true, FontSize: 22, VerticalAlignment: Center);
                 }
             }
 
-            #Content {
+            Group #Content {
+                LayoutMode: Top;
+                Anchor: (Width: 300, Height: 440, Top: 35, Left: 40);
+                Padding: (Horizontal: 10, Vertical: 10);
+
                 CharacterPreviewComponent {
-                    Anchor: (Left: 0, Width: 320, Height: 300, Top: 5);
-                    Padding: (Top: -20, Bottom: -20, Left: -20, Right: -20);
+                    Anchor: (Width: 260, Height: 240);
+                    Padding: (Full: -10);
                 }
 
-                // --- FICHA DE INFORMAÇÕES DO SHINOBI ---
+                // FICHA DO JOGADOR
                 Group #InfoPlayer {
                     LayoutMode: Top;
-                    Anchor: (Top: 5, Width: 320, Height: 130);
-                    Background: (TexturePath: "../../Common/ContainerPanelPatch.png", Border: 4);
-                    Padding: (Full: 10);
+                    Anchor: (Top: 35, Width: 260, Height: 120);
+                    Background: (TexturePath: "../../Common/ContainerPanelPatch.png", Border: 8);
+                    Padding: (Full: 12);
 
                     Group #RowName {
                         LayoutMode: Left;
-                        Anchor: (Height: 28, Width: 300);
+                        Anchor: (Height: 28, Width: 236);
 
                         Label #LabelPlayerName {
-                            Anchor: (Width: 300);
+                            Anchor: (Width: 236);
                             Text: "Name: -";
-                            Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, VerticalAlignment: Center);
+                            Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, VerticalAlignment: Center, FontSize: 14);
                         }
                     }
 
                     Group #RowClan {
                         LayoutMode: Left;
-                        Anchor: (Top: 4, Height: 28, Width: 300);
+                        Anchor: (Top: 4, Height: 28, Width: 236);
 
                         Label #LabelClan {
-                            Anchor: (Width: 300);
+                            Anchor: (Width: 236);
                             Text: "Clan: -";
-                            Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, VerticalAlignment: Center);
+                            Style: (...$C.@DefaultLabelStyle, TextColor: #ffffff, VerticalAlignment: Center, FontSize: 14);
                         }
                     }
 
-                    Group #RowElement {}
+                    Group #RowElement {
+                        LayoutMode: Left;
+                        Anchor: (Top: 4, Height: 28, Width: 236);
+                    }
                 }
             }
         }
 
-        $C.@Container {
-            Anchor: (Width: 620, Height: 520);
 
-            #Title {
-                Group {
-                    LayoutMode: Left;
-                    $C.@Title {
-                        @Text = "PANEL STATUS";
-                    }
-                }
-            }
+        // ================= PAINEL DIREITO (STATUS) =================
+        Group #StatusContainer {
+            Anchor: (Width: 540, Height: 520, Top: 40, Left: 10);
+            LayoutMode: Top;
 
-            #Content {
-                // --- CARD DE PONTOS DE ATRIBUTO ---
+            Group #Content {
+                LayoutMode: Top;
+                Anchor: (Width: 540, Height: 460);
+                Padding: (Horizontal: 15, Vertical: 10);
+
+                // CARD DE PONTOS DE ATRIBUTO
                 Group #ProfileCard {
                     LayoutMode: Top;
-                    Background: (TexturePath: "../../Common/ContainerPanelPatch.png", Border: 4);
-                    Padding: (Full: 12);
+                    Anchor: (Width: 510, Height: 45, Top: 85, Left: 20);
+                    //Background: (TexturePath: "../../Common/ContainerPanelPatch.png", Border: 8);
+                    Padding: (Horizontal: 15, Vertical: 10);
 
                     Group #ProfileRow3 {
                         LayoutMode: Left;
-                        Anchor: (Height: 26);
+                        Anchor: (Height: 25);
 
                         Label #LabelPoints {
-                            Anchor: (Width: 560);
+                            Anchor: (Width: 480);
                             Text: "Pontos de Atributo: 0";
-                            Style: (...$C.@DefaultLabelStyle, TextColor: #E8A93B, RenderBold: true, FontSize: 16);
+                            Style: (...$C.@DefaultLabelStyle, TextColor: $C.@ColorGoldHighlight, RenderBold: true, FontSize: 16, VerticalAlignment: Center);
                         }
                     }
                 }
 
-                $C.@PanelSeparatorFancy {}
-
+                // LISTA DE STATUS E HABILIDADES
                 Group #StatusContent {
                     LayoutMode: Left;
-                    Anchor: (Top: 15, Height: 260);
+                    Anchor: (Top: 20, Width: 510, Height: 350);
 
+                    // COLUNA VITAIS
                     Group #StatusDefault {
                         LayoutMode: Top;
-                        Anchor: (Width: 280);
+                        Anchor: (Width: 245);
 
                         Label {
                             Text: "VITAIS";
                             Anchor: (Height: 25);
-                            Style: (FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #94969a);
+                            Style: (FontSize: 15, RenderBold: true, RenderUppercase: true, TextColor: #2A1A0A);
                         }
 
                         Group #LifeGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 10, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnLife {
-                                @Text = "+";
+                            TextButton #BtnLife {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelLife {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Vida: 100";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
 
                         Group #StaminaGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 8, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnStamina {
-                                @Text = "+";
+                            TextButton #BtnStamina {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelStamina {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Stamina: 100";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
 
                         Group #SpeedGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 8, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnSpeed {
-                                @Text = "+";
+                            TextButton #BtnSpeed {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelSpeed {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Speed: 0";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
 
                         Group #ChakraGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 8, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnChakra {
-                                @Text = "+";
+                            TextButton #BtnChakra {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelChakra {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Chakra: 100";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
                     }
 
+                    // COLUNA HABILIDADES
                     Group #ShinobiStatus {
                         LayoutMode: Top;
-                        Anchor: (Left: 20, Width: 280);
+                        Anchor: (Left: 20, Width: 245);
 
                         Label {
                             Text: "HABILIDADES";
                             Anchor: (Height: 25);
-                            Style: (FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #94969a);
+                            Style: (FontSize: 15, RenderBold: true, RenderUppercase: true, TextColor: #2A1A0A);
                         }
 
                         Group #NinjutsuGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 10, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnNinjutsu {
-                                @Text = "+";
+                            TextButton #BtnNinjutsu {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelNinjutsu {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Ninjutsu: 0";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
 
                         Group #TaijutsuGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 8, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnTaijutsu {
-                                @Text = "+";
+                            TextButton #BtnTaijutsu {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelTaijutsu {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Taijutsu: 0";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
 
                         Group #GenjutsuGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 8, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnGenjutsu {
-                                @Text = "+";
+                            TextButton #BtnGenjutsu {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelGenjutsu {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Genjutsu: 0";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
 
                         Group #ChakraControlGroup {
                             LayoutMode: Left;
-                            Anchor: (Top: 10, Height: 35);
+                            Anchor: (Top: 8, Height: 32, Width: 245);
 
-                            $C.@SmallSecondaryTextButton #BtnChakraControl {
-                                @Text = "+";
+                            TextButton #BtnChakraControl {
+                                Text: "+";
                                 Anchor: (Width: 28, Height: 28);
+                                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                                Style: @SecondaryButton;
                             }
 
                             Label #LabelChakraControl {
-                                Anchor: (Left: 12);
+                                Anchor: (Left: 10, Width: 200);
                                 Text: "Chakra Control: 0";
-                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center);
+                                Style: (...$C.@DefaultLabelStyle, VerticalAlignment: Center, TextColor: #1A1A1A, FontSize: 15);
                             }
                         }
                     }

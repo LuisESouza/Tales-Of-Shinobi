@@ -2,7 +2,7 @@ $C = "../../../Common.ui";
 
 Group #ClanSkillRoot {
     LayoutMode: Left;
-    Anchor: (Width: 560, Height: 78, Top: 6);
+    Anchor: (Width: 400, Height: 78, Top: 6);
     Background: (TexturePath: "../../../Common/ContainerPanelPatch.png", Border: 4);
     Padding: (Full: 8);
 
@@ -13,18 +13,9 @@ Group #ClanSkillRoot {
         LayoutMode: Left;
         Anchor: (Full: 0);
 
-        Group #ClanIconContainer {
-            Anchor: (Width: 62, Height: 62);
-            Background: #000000(0.5);
-
-            Group #ClanIcon {
-                Anchor: (Width: 54, Height: 54, Top: 4, Left: 4);
-            }
-        }
-
         Group #ClanDetails {
             LayoutMode: Top;
-            Anchor: (Left: 12, Width: 320, Height: 62);
+            Anchor: (Left: 12, Width: 270, Height: 62);
 
             Group #RowClanHeader {
                 LayoutMode: Left;
@@ -71,11 +62,11 @@ Group #ClanSkillRoot {
 
         Group #ClanAction {
             LayoutMode: Left;
-            Anchor: (Right: 5, Width: 130, Height: 62);
+            Anchor: (Right: 5, Width: 90, Height: 62);
 
             $C.@SmallSecondaryTextButton #BtnSelectClan {
                 @Text = "ENTRAR NO CLÃ";
-                Anchor: (Width: 130, Height: 36, Top: 13);
+                Anchor: (Width: 90, Height: 36, Top: 13);
             }
         }
     }
@@ -91,15 +82,6 @@ Group #ClanSkillRoot {
         Group #MyClanInfo {
             LayoutMode: Left;
             Anchor: (Width: 200, Height: 62);
-
-            Group #MyClanIconContainer {
-                Anchor: (Width: 62, Height: 62);
-                Background: #000000(0.5);
-
-                Group #MyClanIcon {
-                    Anchor: (Width: 54, Height: 54, Top: 4, Left: 4);
-                }
-            }
 
             Group #MyClanHeader {
                 LayoutMode: Top;
@@ -131,7 +113,7 @@ Group #ClanSkillRoot {
 
         Group #ClanSkillsContainer {
             LayoutMode: Left;
-            Anchor: (Left: 12, Width: 330, Height: 62);
+            Anchor: (Left: 12, Width: 270, Height: 62);
 
             Group #SkillsGrid {
                 LayoutMode: Left;
@@ -140,10 +122,6 @@ Group #ClanSkillRoot {
                 Group #SkillSlotItem {
                     Anchor: (Width: 54, Height: 54, Left: 4, Top: 4);
                     Background: #000000(0.6);
-
-                    Group #SkillIcon {
-                        Anchor: (Width: 46, Height: 46, Top: 4, Left: 4);
-                    }
 
                     Label #LabelSkillLevel {
                         Anchor: (Right: 2, Bottom: 2);

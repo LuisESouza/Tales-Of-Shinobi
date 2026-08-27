@@ -1,16 +1,32 @@
 $C = "../../../Common.ui";
 
+@SecondaryButton = TextButtonStyle(
+  Default: (LabelStyle: (FontSize: 24, TextColor: #000000, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (LabelStyle: (FontSize: 24, TextColor: #FFFFFF, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (LabelStyle: (FontSize: 24, TextColor: #000000, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
 Group #NavigationMenusRoot {
-    Anchor: (Width: 940, Height: 50);
-    LayoutMode: Left;
+    Anchor: (Width: 240, Height: 240);
+    LayoutMode: Center;
 
-    $C.@SmallSecondaryTextButton #BtnStatusMenu {
-        @Text = "Stats Menu";
-        Anchor: (Width: 120, Height: 50);
+    TextButton #BtnStatusMenu{
+        Text: "Stats";
+        Anchor: (Width: 180, Height: 220);
+        Background: (PatchStyle(TexturePath: "../../Assets/BgButton.png"));
+        Style: @SecondaryButton;
     }
 
-    $C.@SmallSecondaryTextButton #BtnSkillsMenu {
-        @Text = "Skills Menu";
-        Anchor: (Width: 120, Height: 50, Left: 15);
+    TextButton #BtnSkillsMenu{
+        Text: "Skills";
+        Anchor: (Width: 180, Height: 220);
+        Background: (PatchStyle(TexturePath: "../../Assets/BgButton.png"));
+        Style: @SecondaryButton;
     }
+
+    //    $C.@SmallSecondaryTextButton #BtnStatusMenu {
+    //        @Text = "Stats Menu";
+    //        Anchor: (Width: 120, Height: 50);
+    //       // Background: (PatchStyle(TexturePath: "../../Assets/BgButton.png"));
+    //    }
 }
