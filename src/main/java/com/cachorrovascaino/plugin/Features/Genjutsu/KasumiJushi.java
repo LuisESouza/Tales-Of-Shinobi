@@ -25,11 +25,10 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import com.hypixel.hytale.server.npc.role.Role;
+
 import org.joml.Vector3d;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -91,7 +90,6 @@ public class KasumiJushi implements Jutsu {
             }
         }
 
-        // Se nenhum alvo for encontrado, cancela a execução sem afetar o conjurador
         if (targetEntityRef == null) {
             playerRef.sendMessage(Message.raw("No valid target found for Kasumi Jūshi!").color(Color.RED));
             return;
@@ -101,20 +99,14 @@ public class KasumiJushi implements Jutsu {
         Vector3d targetPos = (targetTransform != null) ? targetTransform.getPosition() : playerTransform.getPosition();
 
         double[][] offsets = {{2.0, 2.0}, {-2.0, 2.0}, {2.0, -2.0}, {-2.0, -2.0}};
-        List<Ref<EntityStore>> spawnedClones = new ArrayList<>();
 
         for (double[] offset : offsets) {
-            Ref<EntityStore> cloneRef = CloneJutsuUtils.spawnClone(
+            CloneJutsuUtils.spawnClone(
                     playerRef, playerEntityRef, store, world,
                     (targetPos.x - playerTransform.getPosition().x) + offset[0],
                     (targetPos.z - playerTransform.getPosition().z) + offset[1],
                     DURATION_SECONDS, CLONE_ROLE, null
             );
-
-            if (cloneRef != null && cloneRef.isValid()) {
-                spawnedClones.add(cloneRef);
-                CloneJutsuUtils.forceCloneAttack(cloneRef, targetEntityRef, store);
-            }
         }
 
         final Ref<EntityStore> finalTargetEntityRef = targetEntityRef;
@@ -208,12 +200,6 @@ public class KasumiJushi implements Jutsu {
     private void suppressMobAI(Ref<EntityStore> mobRef, Store<EntityStore> store) {
         if (NPCEntity.getComponentType() == null) return;
         NPCEntity npcEntity = store.getComponent(mobRef, NPCEntity.getComponentType());
-        if (npcEntity != null && npcEntity.getRole() != null) {
-            Role role = npcEntity.getRole();
-            role.setMarkedTarget("target", null);
-            role.setMarkedTarget("combatTarget", null);
-            role.setMarkedTarget("player", null);
-            role.getStateSupport().setState(mobRef, "Idle", null, store);
-        }
+        if (npcEntity != null && npcEntity.getRole() != null) {}
     }
 }

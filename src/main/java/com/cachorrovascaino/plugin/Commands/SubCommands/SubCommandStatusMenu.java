@@ -17,10 +17,8 @@ public class SubCommandStatusMenu extends AbstractPlayerCommand {
 
     public SubCommandStatusMenu() {
         super("panel", "Open panel of status", false);
+        this.requireNoPermission();
     }
-
-    @Override
-    protected boolean canGeneratePermission() { return false; }
 
     @Override
     protected void execute(

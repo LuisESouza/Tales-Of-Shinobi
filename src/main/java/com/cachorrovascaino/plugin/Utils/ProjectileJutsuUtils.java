@@ -1,7 +1,11 @@
 package com.cachorrovascaino.plugin.Utils;
 
-import com.hypixel.hytale.component.*;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.RemoveReason;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Rotation3f;
+import com.hypixel.hytale.protocol.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
@@ -59,7 +63,6 @@ public class ProjectileJutsuUtils {
         spawnVerticalMeteorJutsu(playerRef, playerEntityRef, store, world, assetKey, damageAmount, fallSpeed, targetDistance, skyHeight, scale, damageCauseKey, castMessage, null);
     }
 
-    // --- MÉTODOS COMPLETOS (Com Suporte a Callback de Colisão) ---
     public static void spawnProjectileJutsuEx(
             PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world,
             String assetKey, float damageAmount, double speed, double rightOffset, double upOffset, double forwardOffset,
@@ -122,8 +125,6 @@ public class ProjectileJutsuUtils {
         executeSpawn(playerRef, playerEntityRef, store, world, assetKey, damageAmount, spawnPosition, velocityVector, scale, damageCauseKey, castMessage, onImpactCallback);
     }
 
-    // --- EXECUÇÃO INTERNA ---
-
     private static void executeSpawn(
             PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world,
             String assetKey, float damageAmount, Vector3d spawnPosition, Vector3d velocityVector,
@@ -149,7 +150,6 @@ public class ProjectileJutsuUtils {
                 CommandBuffer<EntityStore> commandBuffer = (CommandBuffer<EntityStore>) TAKE_COMMAND_BUFFER_METHOD.invoke(entityStore);
 
                 Ref<EntityStore> projectileRef = ProjectileModule.get().spawnProjectile(
-                        null,
                         playerEntityRef,
                         commandBuffer,
                         config,
@@ -191,7 +191,8 @@ public class ProjectileJutsuUtils {
                     );
 
                     if (physicsProvider != null) {
-                        physicsProvider.setImpactConsumer((ref, hitPos, targetRef, detailName, cmdBuf) -> {
+                        physicsProvider.setImpactConsumer((projRef, hitPos, bounceBlockPos, targetRef, collisionDetailName, cmdBuf) -> {
+
                             if (targetRef != null && targetRef.isValid() && targetRef.equals(playerEntityRef)) {
                                 return;
                             }
@@ -201,16 +202,17 @@ public class ProjectileJutsuUtils {
                                 if (damageCause == null) {
                                     damageCause = DamageCause.getAssetMap().getAsset(0);
                                 }
-                                Damage.Source source = new Damage.ProjectileSource(playerEntityRef, ref);
+                                Damage.Source source = new Damage.ProjectileSource(playerEntityRef, projRef);
+                                if(damageCause == null) return;
                                 Damage damageEvent = new Damage(source, damageCause, damageAmount);
                                 cmdBuf.invoke(targetRef, damageEvent);
                             }
 
                             if (onImpactCallback != null) {
-                                onImpactCallback.accept(hitPos);
+                                    onImpactCallback.accept(hitPos);
                             }
 
-                            cmdBuf.removeEntity(ref, RemoveReason.REMOVE);
+                            cmdBuf.removeEntity(projRef, RemoveReason.REMOVE);
                         });
                     }
                 });

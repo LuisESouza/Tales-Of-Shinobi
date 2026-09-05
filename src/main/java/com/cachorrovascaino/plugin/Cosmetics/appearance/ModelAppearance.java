@@ -9,23 +9,6 @@ import com.hypixel.hytale.codec.schema.metadata.ui.UIPropertyTitle;
 import com.hypixel.hytale.codec.validation.Validators;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetValidator;
 
-// Portado do mod "Wardrobe" (dev.hardaway.wardrobe.impl.cosmetic.appearance.ModelAppearance).
-//
-// IMPORTANTE: este é o motivo pelo qual o Sharingan não renderizava. O campo "Model" aqui
-// é validado com CommonAssetValidator.MODEL_CHARACTER_ATTACHMENT — a mesma categoria de
-// asset que o Hytale usa nativamente para peças anexadas (attachments) ao personagem.
-// Isso é o que a sua CosmeticAsset original NÃO fazia (ela só guardava a string, sem
-// validar/categorizar o asset como attachment).
-//
-// Seu JSON já está no formato certo, sem precisar mudar nada:
-// {
-//   "Icon": "...",
-//   "CosmeticSlot": "Eyes",
-//   "Appearance": {
-//     "Model": "Characters/Eyes/Sharingan/Sharingan.blockymodel",
-//     "TextureConfig": { "Texture": "Characters/Eyes/Sharingan/Sharingan.png" }
-//   }
-// }
 public class ModelAppearance implements Appearance {
 
     public static final BuilderCodec<ModelAppearance> CODEC =

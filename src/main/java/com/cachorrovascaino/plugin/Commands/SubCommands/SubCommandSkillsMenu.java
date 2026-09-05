@@ -15,10 +15,10 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class SubCommandSkillsMenu  extends AbstractPlayerCommand {
 
-    public SubCommandSkillsMenu(){super("skill", "Open panel of status", false);}
-
-    @Override
-    protected boolean canGeneratePermission() { return false; }
+    public SubCommandSkillsMenu(){
+        super("skill", "Open panel of status", false);
+        this.requireNoPermission();
+    }
 
     @Override
     protected void execute(

@@ -12,15 +12,15 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
 import javax.annotation.Nonnull;
 
-public class SubCommandAddPoints extends AbstractPlayerCommand {
+public class SubCommandPutMangekyou extends AbstractPlayerCommand {
+    private final RequiredArg<String> nameArg;
 
-    private final RequiredArg<Integer> amountArg;
-
-    public SubCommandAddPoints() {
-        super("addpoint", "Adds attribute points to the player.");
-        this.amountArg = this.withRequiredArg("amount", "Amount of points", ArgTypes.INTEGER);
+    public SubCommandPutMangekyou() {
+        super("mangekyou", "Alter mangekyou player.");
+        this.nameArg = this.withRequiredArg("Name mangekyou. Ex: OBITO", "Name mangekyou", ArgTypes.STRING);
     }
 
     @Override
@@ -38,9 +38,10 @@ public class SubCommandAddPoints extends AbstractPlayerCommand {
             return;
         }
 
-        int amount = this.amountArg.get(commandContext);
-        data.addPoint(amount);
+        String name = this.nameArg.get(commandContext);
+        data.setMangekyouType(name);
         Main.getDataManager().savePlayer(playerRef.getUuid());
-        commandContext.sendMessage(Message.raw("Successfully added " + amount + " status point(s)!"));
+
+        commandContext.sendMessage(Message.raw("Successfully"));
     }
 }

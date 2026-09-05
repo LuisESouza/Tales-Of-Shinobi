@@ -10,6 +10,7 @@ import com.cachorrovascaino.plugin.Features.Genjutsu.NehanShojo;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.DotonWallJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.ShadowCloneJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.SubstitutionJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.WaterWalkJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.FireBallJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.MeteoroJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.heal.HealJutsu;
@@ -75,6 +76,7 @@ public class JutsuManager {
         registerJutsu(MeteoroJutsu.INSTANCE);
         registerJutsu(DotonWallJutsu.INSTANCE);
         registerJutsu(HealJutsu.INSTANCE);
+        registerJutsu(WaterWalkJutsu.INSTANCE);
 
         // Taijutsus
         registerJutsu(LeafHurricane.INSTANCE);
@@ -157,7 +159,7 @@ public class JutsuManager {
     }
 
     public void startCharging(PlayerRef playerRef) {
-        PlayerData data = plugin.getDataManager().getPlayerData(playerRef.getUuid());
+        PlayerData data = Main.getDataManager().getPlayerData(playerRef.getUuid());
         UUID uuid = playerRef.getUuid();
 
         activePlayerRefs.put(uuid, playerRef);
@@ -166,8 +168,6 @@ public class JutsuManager {
         Ref<EntityStore> ref = playerRef.getReference();
         if (ref != null && ref.isValid()) {
             Store<EntityStore> store = ref.getStore();
-
-            data.getCurrentChakra();
 
             if(data.getCurrentChakra() < data.getMaxChakra()){
                 AnimationUtils.playAnimation(ref, AnimationSlot.Action, "ChakraCharge", true, store);
@@ -185,15 +185,13 @@ public class JutsuManager {
             Ref<EntityStore> ref = playerRef.getReference();
             if (ref != null && ref.isValid()) {
                 Store<EntityStore> store = ref.getStore();
-
-                AnimationUtils.stopAnimation(ref, AnimationSlot.Action, true, store);
-                AnimationUtils.playAnimation(ref, AnimationSlot.Action, "Idle", true, store);
+                AnimationUtils.playAnimation(ref, AnimationSlot.Action, (String) null, true, store);
             }
         }
     }
 
     public void tickChakraRecharge(PlayerRef playerRef) {
-        PlayerData data = plugin.getDataManager().getPlayerData(playerRef.getUuid());
+        PlayerData data = Main.getDataManager().getPlayerData(playerRef.getUuid());
         if (data == null) return;
 
         float current = data.getCurrentChakra();
@@ -202,7 +200,7 @@ public class JutsuManager {
         if (current >= max) return;
 
         float baseRecharge = 2.0f;
-        float controlBonus = (data.getChakraControl() - 1.0f) * 1.0f;
+        float controlBonus = (data.getChakraControl() - 1.0f);
         float totalRecharge = baseRecharge + Math.max(0.0f, controlBonus);
 
         float nextChakra = Math.min(max, current + totalRecharge);
@@ -249,7 +247,7 @@ public class JutsuManager {
 
     // --- PROCESSA COMBOS DE JUTSU (Iniciados com L) ---
     private void checkComboExecution(PlayerRef playerRef, String combo) {
-        PlayerData playerData = plugin.getDataManager().getPlayerData(playerRef.getUuid());
+        PlayerData playerData = Main.getDataManager().getPlayerData(playerRef.getUuid());
         if (playerData == null) return;
 
         String slot = null;
@@ -285,7 +283,7 @@ public class JutsuManager {
     private void checkTransformationExecution(PlayerRef playerRef, String combo) {
         if (combo.split("-").length < 3) return;
 
-        boolean handled = plugin.getClanManager().handleTransformationCombo(playerRef, combo);
+        boolean handled = Main.getClanManager().handleTransformationCombo(playerRef, combo);
         if (!handled) {
             resetComboData(playerRef);
         }
@@ -309,7 +307,7 @@ public class JutsuManager {
             return;
         }
 
-        PlayerData playerData = plugin.getDataManager().getPlayerData(uuid);
+        PlayerData playerData = Main.getDataManager().getPlayerData(uuid);
         if (playerData == null) {
             resetComboData(playerRef);
             return;
@@ -333,9 +331,8 @@ public class JutsuManager {
                 return;
             }
 
-            if (resourceCost > 0) {
-                PlayerStatUtils.consumeStamina(store, ref, DefaultEntityStatTypes.getStamina(), resourceCost);
-            }
+            if (resourceCost > 0) {PlayerStatUtils.consumeStamina(store, ref, resourceCost);}
+
         } else {
             float currentChakra = ChakraUtils.getCurrentChakra(playerRef);
             if (currentChakra < resourceCost) {

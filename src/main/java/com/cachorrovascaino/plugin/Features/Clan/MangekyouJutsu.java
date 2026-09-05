@@ -1,9 +1,13 @@
 package com.cachorrovascaino.plugin.Features.Clan;
 
 import com.cachorrovascaino.plugin.Abstractions.ClanJutsu;
+import com.cachorrovascaino.plugin.Data.Components.MangekyouSharingan;
+import com.cachorrovascaino.plugin.Data.Components.Sharingan;
+import com.cachorrovascaino.plugin.Data.MangekyouType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Utils.EyesUtils;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -13,51 +17,25 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.awt.Color;
 
-/**
- * Mangekyō Sharingan - habilidade de clã EQUIPÁVEL (não faz parte do toggle
- * passivo F-F-F). Precisa do Dōjutsu base já ativo pra poder ser usada
- * (ver canExecute). Cada execução liga/desliga o Mangekyō por cima do
- * estágio base atual (sharingan_3, etc) - funciona como uma transformação
- * dentro da transformação.
- */
 public class MangekyouJutsu implements ClanJutsu {
 
     public static final MangekyouJutsu INSTANCE = new MangekyouJutsu();
-
-    private static final String MANGEKYOU_EYE_ASSET = "Mangekyo_Sharingan_Obito_HD";
-
     private final EyesUtils eyesUtils = new EyesUtils();
 
-    private MangekyouJutsu() {
-    }
+    private MangekyouJutsu() {}
 
-    @Override
-    public String getId() {
-        return "mangekyou";
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Mangekyō Sharingan";
-    }
-
-    @Override
-    public float getChakraCost() {
-        return 80.0f;
-    }
-
-    @Override
-    public float getCooldown() {
-        return 60.0f;
-    }
+    @Override public String getId() { return "mangekyou"; }
+    @Override public String getDisplayName() { return "Mangekyō Sharingan"; }
+    @Override public float getChakraCost() { return 80.0f; }
+    @Override public float getCooldown() { return 10.0f; }
 
     @Override
     public boolean canExecute(PlayerRef playerRef) {
-        PlayerData playerData = Main.get().getDataManager().getPlayerData(playerRef.getUuid());
+        PlayerData playerData = Main.getDataManager().getPlayerData(playerRef.getUuid());
         if (playerData == null) return false;
 
-        if (!playerData.isEyeDojutsuActive()) {
-            playerRef.sendMessage(Message.raw("Ative o Dōjutsu (F-F-F) antes de usar o Mangekyō!").color(Color.RED));
+        if (!"Uchiha".equalsIgnoreCase(playerData.getClan())) {
+            playerRef.sendMessage(Message.raw("Apenas membros do clã Uchiha podem despertar o Mangekyō!").color(Color.RED));
             return false;
         }
 
@@ -66,22 +44,54 @@ public class MangekyouJutsu implements ClanJutsu {
 
     @Override
     public void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world) {
-        PlayerData playerData = Main.get().getDataManager().getPlayerData(playerRef.getUuid());
+        if (playerRef == null || !playerEntityRef.isValid() || world == null) return;
+
+        PlayerData playerData = Main.getDataManager().getPlayerData(playerRef.getUuid());
         if (playerData == null) return;
 
-        boolean mangekyouActive = MANGEKYOU_EYE_ASSET.equals(playerData.getEyesId());
+        ComponentType<EntityStore, Sharingan> sharinganType = Main.get().getSharinganComponentType();
+        ComponentType<EntityStore, MangekyouSharingan> mangekyouTypeComp = Main.get().getMangekyouSharinganComponentType();
 
-        if (mangekyouActive) {
-            String baseStage = playerData.getEyeDojutsuType();
-            playerData.applyDojutsuEyes(baseStage, "");
-            eyesUtils.updateHytalePlayerEyes(playerRef, baseStage, "");
-            playerRef.sendMessage(Message.raw("Mangekyō Sharingan desativado.").color(Color.GRAY));
-        } else {
-            playerData.applyDojutsuEyes(MANGEKYOU_EYE_ASSET, "");
-            eyesUtils.updateHytalePlayerEyes(playerRef, MANGEKYOU_EYE_ASSET, "");
-            playerRef.sendMessage(Message.raw("Mangekyō Sharingan ativado!").color(Color.RED));
-        }
+        if (sharinganType == null || mangekyouTypeComp == null) return;
 
-        Main.get().getDataManager().savePlayer(playerRef.getUuid());
+        world.execute(() -> {
+            if (!playerEntityRef.isValid()) return;
+
+            if (store.getComponent(playerEntityRef, sharinganType) == null && store.getComponent(playerEntityRef, mangekyouTypeComp) == null) {
+                playerRef.sendMessage(Message.raw("Você precisa ativar o Sharingan antes de evoluir para o Mangekyō!").color(Color.RED));
+                return;
+            }
+
+            MangekyouType mType;
+            String rawMangekyouType = playerData.getMangekyouType();
+
+            try {
+                if (rawMangekyouType == null || rawMangekyouType.isEmpty()) {
+                    throw new IllegalArgumentException("Mangekyou não definido");
+                }
+                mType = MangekyouType.valueOf(rawMangekyouType.toUpperCase());
+            } catch (Exception e) {
+                mType = MangekyouType.OBITO;
+                playerData.setMangekyouType(mType.name());
+            }
+
+            if (store.getComponent(playerEntityRef, mangekyouTypeComp) != null) {
+                store.removeComponent(playerEntityRef, mangekyouTypeComp);
+
+                String baseStage = playerData.getEyeDojutsuType();
+                eyesUtils.updateHytalePlayerEyes(world, playerRef, baseStage, "");
+
+                playerRef.sendMessage(Message.raw("Mangekyō Sharingan desativado.").color(Color.GRAY));
+            } else {
+                store.addComponent(playerEntityRef, mangekyouTypeComp, new MangekyouSharingan());
+
+                String targetAsset = mType.getEyeAsset();
+                eyesUtils.updateHytalePlayerEyes(world, playerRef, targetAsset, "");
+
+                playerRef.sendMessage(Message.raw("Mangekyō Sharingan (" + mType.name() + ") ATIVADO!").color(Color.RED));
+            }
+
+            Main.getDataManager().savePlayer(playerRef.getUuid());
+        });
     }
 }

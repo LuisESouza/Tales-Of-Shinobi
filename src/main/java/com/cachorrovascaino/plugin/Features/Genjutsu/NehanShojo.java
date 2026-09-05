@@ -205,13 +205,5 @@ public class NehanShojo implements Jutsu {
 
     private void suppressMobAI(Ref<EntityStore> mobRef, Store<EntityStore> store) {
         if (NPCEntity.getComponentType() == null) return;
-
-        NPCEntity npcEntity = store.getComponent(mobRef, NPCEntity.getComponentType());
-        if (npcEntity != null && npcEntity.getRole() != null) {
-            Role role = npcEntity.getRole();
-            role.setMarkedTarget("target", null);
-            role.setMarkedTarget("combatTarget", null);
-            role.getStateSupport().setState(mobRef, "Idle", null, store);
-        }
     }
 }

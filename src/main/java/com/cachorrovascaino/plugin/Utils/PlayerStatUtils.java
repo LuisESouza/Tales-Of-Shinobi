@@ -78,8 +78,8 @@ public final class PlayerStatUtils {
     // CONSUMO DE RECURSOS NATIVOS
     // ============================================================
 
-    public static void consumeStamina(Store<EntityStore> store, Ref<EntityStore> ref, float percentual, float minStamina) {
-        consumeResource(store, ref, DefaultEntityStatTypes.getStamina(), percentual, minStamina);
+    public static void consumeStamina(Store<EntityStore> store, Ref<EntityStore> ref, float percentual) {
+        consumeResource(store, ref, DefaultEntityStatTypes.getStamina(), percentual);
     }
 
     public static void consumeHealthDirectly(Store<EntityStore> store, Ref<EntityStore> ref, float amount) {
@@ -109,14 +109,14 @@ public final class PlayerStatUtils {
         statMap.putModifier(index, key, modifier);
     }
 
-    private static void consumeResource(Store<EntityStore> store, Ref<EntityStore> ref, int index, float percentual, float minValue) {
+    private static void consumeResource(Store<EntityStore> store, Ref<EntityStore> ref, int index, float percentual) {
         EntityStatMap statMap = store.getComponent(ref, EntityStatMap.getComponentType());
         if (statMap == null) return;
 
         EntityStatValue stat = statMap.get(index);
         if (stat != null) {
             float gasto = stat.getMax() * percentual;
-            float novaValue = Math.max(minValue, stat.get() - gasto);
+            float novaValue = Math.max(0.0F, stat.get() - gasto);
             statMap.setStatValue(index, novaValue);
         }
     }

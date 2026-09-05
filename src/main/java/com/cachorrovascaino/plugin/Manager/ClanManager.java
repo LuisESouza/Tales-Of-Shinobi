@@ -2,16 +2,22 @@ package com.cachorrovascaino.plugin.Manager;
 
 import com.cachorrovascaino.plugin.Abstractions.ClanJutsu;
 import com.cachorrovascaino.plugin.Data.Clan.ClanType;
+import com.cachorrovascaino.plugin.Data.Components.Byakugan;
+import com.cachorrovascaino.plugin.Data.Components.Sharingan;
 import com.cachorrovascaino.plugin.Data.PlayerData;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.KamuiBehindTeleportJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.KamuiIntangibilityJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.KotoamatsukamiOpticalTetherJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.KotoamatsukamiSensoryBlindspotJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.ByakuganJutsu;
 import com.cachorrovascaino.plugin.Features.Clan.MangekyouJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.SharinganJutsu;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Utils.ChakraUtils;
 import com.cachorrovascaino.plugin.Utils.EyesUtils;
-import com.cachorrovascaino.plugin.Utils.WeatherUtils;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -23,8 +29,7 @@ import java.util.UUID;
 
 public class ClanManager {
 
-    private EyesUtils eyesUtils = new EyesUtils();
-    private WeatherUtils weatherUtils = new WeatherUtils();
+    private final EyesUtils eyesUtils = new EyesUtils();
     private final Main plugin;
 
     private final Map<String, ClanJutsu> clanJutsuRegistry = new HashMap<>();
@@ -38,8 +43,8 @@ public class ClanManager {
 
     private static final Map<String, String> CLAN_SLOT_COMBOS = Map.of(
             "R-L-L", "slot_1",
-            "R-L-R", "slot_2",
-            "R-R-L", "slot_3"
+            "R-R-L", "slot_2",
+            "R-L-R", "slot_3"
     );
 
     public ClanManager(Main plugin) {
@@ -47,21 +52,32 @@ public class ClanManager {
         registerClanJutsus();
     }
 
-    private void registerClanJutsus() { registerClanJutsu(MangekyouJutsu.INSTANCE); }
+    private void registerClanJutsus() {
+        registerClanJutsu(ByakuganJutsu.INSTANCE);
+        registerClanJutsu(SharinganJutsu.INSTANCE);
+
+        registerClanJutsu(MangekyouJutsu.INSTANCE);
+        // OBITO
+        registerClanJutsu(KamuiIntangibilityJutsu.INSTANCE);
+        registerClanJutsu(KamuiBehindTeleportJutsu.INSTANCE);
+        // SHISUI
+        registerClanJutsu(KotoamatsukamiOpticalTetherJutsu.INSTANCE);
+        registerClanJutsu(KotoamatsukamiSensoryBlindspotJutsu.INSTANCE);
+    }
 
     private void registerClanJutsu(ClanJutsu jutsu) { clanJutsuRegistry.put(jutsu.getId(), jutsu); }
 
     public boolean setPlayerClan(PlayerRef playerRef, ClanType newClan) {
         if (playerRef == null || newClan == null) return false;
 
-        PlayerData data = plugin.getDataManager().getPlayerData(playerRef.getUuid());
+        PlayerData data = Main.getDataManager().getPlayerData(playerRef.getUuid());
         if (data == null) return false;
 
         data.setClan(newClan.getDisplayName());
         applyClanModifiers(data, newClan);
 
-        plugin.getJutsuManager().updateChakraHud(playerRef);
-        plugin.getDataManager().savePlayer(playerRef.getUuid());
+        Main.getJutsuManager().updateChakraHud(playerRef);
+        Main.getDataManager().savePlayer(playerRef.getUuid());
         return true;
     }
 
@@ -89,20 +105,20 @@ public class ClanManager {
     }
 
     private boolean checkClanComboExecution(PlayerRef playerRef, String combo, String slot) {
-        PlayerData playerData = plugin.getDataManager().getPlayerData(playerRef.getUuid());
+        PlayerData playerData = Main.getDataManager().getPlayerData(playerRef.getUuid());
         if (playerData == null) return false;
 
         String equippedClanJutsuId = playerData.getEquippedClanHotbar().get(slot);
 
         if (equippedClanJutsuId == null) {
             playerRef.sendMessage(Message.raw("No Clan Jutsu equipped on " + slot + "!").color(Color.RED));
-            plugin.getJutsuManager().clearComboState(playerRef);
+            Main.getJutsuManager().clearComboState(playerRef);
             return true;
         }
 
         if (!playerData.hasUnlockClanSkill(equippedClanJutsuId)) {
             playerRef.sendMessage(Message.raw("You haven't learned this Clan Jutsu yet!").color(Color.RED));
-            plugin.getJutsuManager().clearComboState(playerRef);
+            Main.getJutsuManager().clearComboState(playerRef);
             return true;
         }
 
@@ -115,21 +131,21 @@ public class ClanManager {
 
         if (clanJutsu == null) {
             plugin.getLogger().atWarning().log("[ClanManager] Jutsu de Clã com ID '" + clanJutsuId + "' não foi registrado.");
-            plugin.getJutsuManager().clearComboState(playerRef);
+            Main.getJutsuManager().clearComboState(playerRef);
             return;
         }
 
         UUID uuid = playerRef.getUuid();
 
         if (!clanJutsu.canExecute(playerRef)) {
-            plugin.getJutsuManager().clearComboState(playerRef);
+            Main.getJutsuManager().clearComboState(playerRef);
             return;
         }
 
         if (Main.getCooldownManager().isOnCooldown(uuid, clanJutsuId)) {
             float remaining = Main.getCooldownManager().getRemainingSeconds(uuid, clanJutsuId);
             playerRef.sendMessage(Message.raw("Please wait " + String.format("%.1f", remaining) + "s before using this Jutsu again.").color(Color.RED));
-            plugin.getJutsuManager().clearComboState(playerRef);
+            Main.getJutsuManager().clearComboState(playerRef);
             return;
         }
 
@@ -138,13 +154,13 @@ public class ClanManager {
 
         if (currentChakra < jutsuCost) {
             playerRef.sendMessage(Message.raw("Insufficient chakra: " + (int) jutsuCost).color(Color.RED));
-            plugin.getJutsuManager().clearComboState(playerRef);
+            Main.getJutsuManager().clearComboState(playerRef);
             return;
         }
 
         Ref<EntityStore> ref = playerRef.getReference();
         if (ref == null || !ref.isValid()) {
-            plugin.getJutsuManager().clearComboState(playerRef);
+            Main.getJutsuManager().clearComboState(playerRef);
             return;
         }
 
@@ -154,7 +170,7 @@ public class ClanManager {
 
         if (jutsuCost > 0) {
             ChakraUtils.consumeChakra(playerRef, jutsuCost);
-            plugin.getJutsuManager().updateChakraHud(playerRef);
+            Main.getJutsuManager().updateChakraHud(playerRef);
         }
 
         clanJutsu.execute(playerRef, ref, store, world);
@@ -164,83 +180,84 @@ public class ClanManager {
         }
 
         String formattedSequence = combo.replace("L", "M1").replace("R", "F").replace("-", " -> ");
-        plugin.getJutsuManager().updateComboHud(playerRef, formattedSequence, clanJutsu.getDisplayName(), JutsuManager.JUTSU_HUD_DISPLAY_MS);
-        plugin.getJutsuManager().clearComboState(playerRef);
+        Main.getJutsuManager().updateComboHud(playerRef, formattedSequence, clanJutsu.getDisplayName(), JutsuManager.JUTSU_HUD_DISPLAY_MS);
+        Main.getJutsuManager().clearComboState(playerRef);
     }
 
     private boolean handleDojutsuToggleCombo(PlayerRef playerRef, String combo) {
         String formattedSequence = combo.replace("L", "M1").replace("R", "F").replace("-", " -> ");
 
         UUID uuid = playerRef.getUuid();
-        PlayerData playerData = plugin.getDataManager().getPlayerData(uuid);
+        PlayerData playerData = Main.getDataManager().getPlayerData(uuid);
+        if (playerData == null) return false;
 
-        boolean toggled = toggleDojutsu(playerRef, formattedSequence);
-        if (toggled && playerData != null) {
-            ClanType clan = ClanType.fromName(playerData.getClan());
-            String statusMsg = playerData.isEyeDojutsuActive() ? "ACTIVATED" : "DISABLED";
-            plugin.getJutsuManager().updateComboHud(
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref == null || !ref.isValid()) return false;
+
+        Store<EntityStore> store = ref.getStore();
+        ClanType clan = ClanType.fromName(playerData.getClan());
+
+        boolean willBeActive = false;
+        if (clan == ClanType.HYUGA) {
+            willBeActive = store.getComponent(ref, plugin.getByakuganComponentType()) == null;
+        }
+        if (clan == ClanType.UCHIHA) {
+            willBeActive = store.getComponent(ref, plugin.getSharinganComponentType()) == null;
+        }
+
+        boolean toggled = toggleDojutsu(playerRef);
+
+        if (toggled) {
+            String statusMsg = willBeActive ? "ACTIVATED" : "DISABLED";
+            Main.getJutsuManager().updateComboHud(
                     playerRef, formattedSequence, clan.getDisplayName() + " (" + statusMsg + ")", JutsuManager.JUTSU_HUD_DISPLAY_MS
             );
         }
 
-        plugin.getJutsuManager().clearComboState(playerRef);
+        Main.getJutsuManager().clearComboState(playerRef);
         return true;
     }
 
     // ==========================================================================================
     // DŌJUTSU (ativação/desativação visual do estágio PASSIVO)
     // ==========================================================================================
-    public boolean toggleDojutsu(PlayerRef playerRef, String formattedSequence) {
+    public boolean toggleDojutsu(PlayerRef playerRef) {
         if (playerRef == null) return false;
 
         UUID uuid = playerRef.getUuid();
-        PlayerData playerData = plugin.getDataManager().getPlayerData(uuid);
+        PlayerData playerData = Main.getDataManager().getPlayerData(uuid);
         if (playerData == null) return false;
 
         ClanType clan = ClanType.fromName(playerData.getClan());
 
         if (clan == ClanType.NONE) {
-            playerRef.sendMessage(Message.raw("You do not belong to any clan to activate a Dōjutsu.!").color(Color.RED));
+            playerRef.sendMessage(Message.raw("Você não pertence a nenhum clã para ativar um Dōjutsu!").color(Color.RED));
             return false;
         }
 
-        boolean newState = !playerData.isEyeDojutsuActive();
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref == null || !ref.isValid()) return false;
 
-        if (newState) {
-            String currentStageAsset = playerData.getEyeDojutsuType();
-            if (currentStageAsset == null || currentStageAsset.isEmpty() || "NONE".equalsIgnoreCase(currentStageAsset)) {
-                playerRef.sendMessage(Message.raw("You haven't unlocked any stages of the Dōjutsu yet!").color(Color.RED));
+        Store<EntityStore> store = ref.getStore();
+        World world = store.getExternalData().getWorld();
+
+        if (clan == ClanType.HYUGA) {
+            if (!ByakuganJutsu.INSTANCE.canExecute(playerRef)) {
                 return false;
             }
+            ByakuganJutsu.INSTANCE.execute(playerRef, ref, store, world);
+            return true;
         }
 
-        playerData.setEyeDojutsuActive(newState);
-
-        String statusMsg = newState ? "ACTIVATED" : "DISABLED";
-        String dojutsuName = clan.getDisplayName();
-
-        PacketHandler packetHandler = playerRef.getPacketHandler();
-
-        if (newState) {
-            eyesUtils.captureOriginalEyesIfNeeded(playerRef, playerData);
-
-            playerData.applyDojutsuEyes(playerData.getEyeDojutsuType(), "");
-            eyesUtils.updateHytalePlayerEyes(playerRef, playerData.getEyesId(), playerData.getEyesColor());
-
-            if (clan == ClanType.UCHIHA) {weatherUtils.applyPlayerWeather(playerRef, packetHandler, "Sharingan_Vision");}
-
-            playerRef.sendMessage(Message.raw("[" + dojutsuName + "] " + statusMsg + "!").color(Color.RED));
-        } else {
-            playerData.restoreOriginalEyes();
-            eyesUtils.updateHytalePlayerEyes(playerRef, playerData.getOriginalEyesId(), "");
-
-            if (clan == ClanType.UCHIHA) {weatherUtils.resetPlayerWeather(playerRef, packetHandler, "Zone1_Sunny");}
-
-            playerRef.sendMessage(Message.raw("[" + dojutsuName + "] " + statusMsg + "!").color(Color.GRAY));
+        if (clan == ClanType.UCHIHA) {
+            if (!SharinganJutsu.INSTANCE.canExecute(playerRef)) {
+                return false;
+            }
+            SharinganJutsu.INSTANCE.execute(playerRef, ref, store, world);
+            return true;
         }
 
-        plugin.getDataManager().savePlayer(uuid);
-        return true;
+        return false;
     }
 
     public void onClanSkillUnlocked(PlayerRef playerRef, PlayerData playerData, String skillId) {
@@ -250,9 +267,14 @@ public class ClanManager {
         playerData.setEyeDojutsuType(eyeAssetId);
         playerData.setEyeStage(playerData.getEyeStage() + 1);
 
-        if (playerData.isEyeDojutsuActive()) {
-            playerData.applyDojutsuEyes(eyeAssetId, "");
-            eyesUtils.updateHytalePlayerEyes(playerRef, eyeAssetId, "");
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref != null && ref.isValid()) {
+            Store<EntityStore> store = ref.getStore();
+            World world = store.getExternalData().getWorld();
+
+            if (store.getComponent(ref, plugin.getSharinganComponentType()) != null) {
+                eyesUtils.updateHytalePlayerEyes(world, playerRef, eyeAssetId, "");
+            }
         }
     }
 }

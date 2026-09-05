@@ -7,11 +7,6 @@ import com.hypixel.hytale.codec.schema.metadata.Metadata;
 import com.hypixel.hytale.codec.schema.metadata.ui.UIPropertyTitle;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetValidator;
 
-// Portado do mod "Wardrobe" (dev.hardaway.wardrobe.impl.cosmetic.texture.StaticTextureConfig).
-//
-// Mesma lógica do ModelAppearance: o campo "Texture" é validado com
-// CommonAssetValidator.TEXTURE_CHARACTER_ATTACHMENT, categorizando a textura
-// corretamente como parte de um attachment de personagem.
 public class StaticTextureConfig implements TextureConfig {
 
     public static final BuilderCodec<StaticTextureConfig> CODEC =

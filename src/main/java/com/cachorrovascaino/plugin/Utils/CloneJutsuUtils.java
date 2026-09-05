@@ -32,7 +32,7 @@ public class CloneJutsuUtils {
 
     private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
-    public static Ref<EntityStore> spawnClone(
+    public static void spawnClone(
             PlayerRef playerRef,
             Ref<EntityStore> playerEntityRef,
             Store<EntityStore> store,
@@ -43,83 +43,81 @@ public class CloneJutsuUtils {
             String roleName,
             String castMessage
     ) {
-        if (playerRef == null || playerEntityRef == null || !playerEntityRef.isValid()) return null;
+        if (playerRef == null || playerEntityRef == null || !playerEntityRef.isValid() || world == null) return;
 
         if (castMessage != null && !castMessage.isBlank()) {
             playerRef.sendMessage(Message.raw(castMessage).color(Color.ORANGE));
         }
 
-        TransformComponent transform = store.getComponent(playerEntityRef, TransformComponent.getComponentType());
-        if (transform == null) return null;
+        world.execute(() -> {
+            if (!playerEntityRef.isValid()) return;
 
-        Holder<EntityStore> cloneHolder = EntityStore.REGISTRY.newHolder();
+            TransformComponent transform = store.getComponent(playerEntityRef, TransformComponent.getComponentType());
+            if (transform == null) return;
 
-        cloneHolder.addComponent(UUIDComponent.getComponentType(), new UUIDComponent(UUID.randomUUID()));
+            Holder<EntityStore> cloneHolder = EntityStore.REGISTRY.newHolder();
 
-        int nextNetId = world.getEntityStore().takeNextNetworkId();
-        cloneHolder.addComponent(NetworkId.getComponentType(), new NetworkId(nextNetId));
+            cloneHolder.addComponent(UUIDComponent.getComponentType(), new UUIDComponent(UUID.randomUUID()));
 
-        Vector3d spawnPos = new Vector3d(transform.getPosition()).add(offsetX, 0.0, offsetZ);
-        TransformComponent cloneTransform = new TransformComponent();
-        cloneTransform.getPosition().set(spawnPos);
-        cloneTransform.getRotation().set(transform.getRotation());
-        cloneHolder.addComponent(TransformComponent.getComponentType(), cloneTransform);
+            int nextNetId = world.getEntityStore().takeNextNetworkId();
+            cloneHolder.addComponent(NetworkId.getComponentType(), new NetworkId(nextNetId));
 
-        injectHolderComponent(cloneHolder, EntityModule.get().getHeadRotationComponentType(), new HeadRotation(transform.getRotation()));
+            Vector3d spawnPos = new Vector3d(transform.getPosition()).add(offsetX, 0.0, offsetZ);
+            TransformComponent cloneTransform = new TransformComponent();
+            cloneTransform.getPosition().set(spawnPos);
+            cloneTransform.getRotation().set(transform.getRotation());
+            cloneHolder.addComponent(TransformComponent.getComponentType(), cloneTransform);
 
-        BoundingBox playerBox = store.getComponent(playerEntityRef, EntityModule.get().getBoundingBoxComponentType());
-        if (playerBox != null) {
-            injectHolderComponent(cloneHolder, EntityModule.get().getBoundingBoxComponentType(), (BoundingBox) playerBox.clone());
-        }
+            injectHolderComponent(cloneHolder, EntityModule.get().getHeadRotationComponentType(), new HeadRotation(transform.getRotation()));
 
-        var rawSkinType = EntityModule.get().getPlayerSkinComponentType();
-        var rawModelType = EntityModule.get().getModelComponentType();
-
-        PlayerSkinComponent playerSkin = store.getComponent(playerEntityRef, rawSkinType);
-        if (playerSkin != null) {
-            injectHolderComponent(cloneHolder, rawSkinType, playerSkin.clone());
-        }
-
-        ModelComponent playerModel = store.getComponent(playerEntityRef, rawModelType);
-        if (playerModel != null) {
-            injectHolderComponent(cloneHolder, rawModelType, playerModel.clone());
-        }
-
-        Interactable interactable = store.getComponent(playerEntityRef, EntityModule.get().getInteractableComponentType());
-        if (interactable != null) {
-            injectHolderComponent(cloneHolder, EntityModule.get().getInteractableComponentType(), interactable);
-        }
-
-        if (roleName != null && !roleName.isBlank()) {
-            int roleIndex = NPCPlugin.get().getIndex(roleName);
-            if (roleIndex != Integer.MIN_VALUE) {
-                NPCEntity npcEntity = new NPCEntity();
-                npcEntity.setRoleName(roleName);
-                npcEntity.setRoleIndex(roleIndex);
-
-                injectHolderComponent(cloneHolder, NPCEntity.getComponentType(), npcEntity);
+            BoundingBox playerBox = store.getComponent(playerEntityRef, EntityModule.get().getBoundingBoxComponentType());
+            if (playerBox != null) {
+                injectHolderComponent(cloneHolder, EntityModule.get().getBoundingBoxComponentType(), (BoundingBox) playerBox.clone());
             }
-        }
 
-        Ref<EntityStore> cloneRef = world.getEntityStore().getStore().addEntity(cloneHolder, AddReason.SPAWN);
+            var rawSkinType = EntityModule.get().getPlayerSkinComponentType();
+            var rawModelType = EntityModule.get().getModelComponentType();
 
-        if (cloneRef != null && cloneRef.isValid() && durationSec > 0) {
-            SCHEDULER.schedule(() -> {
-                world.execute(() -> {
-                    if (cloneRef.isValid()) {
-                        world.getEntityStore().getStore().removeEntity(cloneRef, RemoveReason.REMOVE);
-                    }
-                });
-            }, durationSec, TimeUnit.SECONDS);
-        }
+            PlayerSkinComponent playerSkin = store.getComponent(playerEntityRef, rawSkinType);
+            if (playerSkin != null) {
+                injectHolderComponent(cloneHolder, rawSkinType, playerSkin.clone());
+            }
 
-        return cloneRef;
+            ModelComponent playerModel = store.getComponent(playerEntityRef, rawModelType);
+            if (playerModel != null) {
+                injectHolderComponent(cloneHolder, rawModelType, playerModel.clone());
+            }
+
+            Interactable interactable = store.getComponent(playerEntityRef, EntityModule.get().getInteractableComponentType());
+            if (interactable != null) {
+                injectHolderComponent(cloneHolder, EntityModule.get().getInteractableComponentType(), interactable);
+            }
+
+            if (roleName != null && !roleName.isBlank()) {
+                int roleIndex = NPCPlugin.get().getIndex(roleName);
+                if (roleIndex != Integer.MIN_VALUE) {
+                    NPCEntity npcEntity = new NPCEntity();
+                    npcEntity.setRoleName(roleName);
+                    npcEntity.setRoleIndex(roleIndex);
+
+                    injectHolderComponent(cloneHolder, NPCEntity.getComponentType(), npcEntity);
+                }
+            }
+
+            Ref<EntityStore> cloneRef = world.getEntityStore().getStore().addEntity(cloneHolder, AddReason.SPAWN);
+
+            if (cloneRef != null && cloneRef.isValid() && durationSec > 0) {
+                SCHEDULER.schedule(() -> {
+                    world.execute(() -> {
+                        if (cloneRef.isValid()) {
+                            world.getEntityStore().getStore().removeEntity(cloneRef, RemoveReason.REMOVE);
+                        }
+                    });
+                }, durationSec, TimeUnit.SECONDS);
+            }
+        });
     }
 
-    /**
-     * Força a atração de combate do clone para qualquer entidade (Player ou Mob),
-     * ignorando travas de facção/proprietário.
-     */
     public static void forceCloneAttack(Ref<EntityStore> cloneRef, Ref<EntityStore> victimRef, Store<EntityStore> store) {
         if (cloneRef == null || victimRef == null || !cloneRef.isValid() || !victimRef.isValid()) return;
 
@@ -130,12 +128,6 @@ public class CloneJutsuUtils {
         npc.onFlockSetTarget("combat_target", victimRef);
         npc.onFlockSetTarget("enemy", victimRef);
         npc.onFlockSetTarget("hostile", victimRef);
-
-        if (npc.getRole() != null) {
-            if (npc.getRole().getStateSupport() != null) {
-                npc.getRole().getStateSupport().setState(cloneRef, "Combat", "Attacking", store);
-            }
-        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

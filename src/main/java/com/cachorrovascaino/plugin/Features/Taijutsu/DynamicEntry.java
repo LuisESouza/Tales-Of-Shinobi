@@ -6,12 +6,15 @@ import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Systems.DamageTrackingSystem;
+import com.cachorrovascaino.plugin.Utils.CameraUtil;
+import com.cachorrovascaino.plugin.Utils.TargetUtils;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.protocol.AnimationSlot;
+import com.hypixel.hytale.protocol.ChangeVelocityType;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
@@ -38,12 +41,12 @@ public class DynamicEntry implements Jutsu {
 
     public static final DynamicEntry INSTANCE = new DynamicEntry();
 
-    private static final double DASH_RANGE = 10.0;
+    private static final double DASH_RANGE = 12.0;
     private static final float BASE_DAMAGE = 120.0f;
     private static final float DAMAGE_PER_LEVEL = 20.0f;
     private static final String PARTICLE_ID = "Leaf_Hurricane_Circle";
 
-    private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(2);
+    private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(4);
 
     private static Method TAKE_COMMAND_BUFFER_METHOD;
     private static Method CONSUME_METHOD;
@@ -87,69 +90,116 @@ public class DynamicEntry implements Jutsu {
         PhysicsMath.vectorFromAngles(originalRotation.yaw(), originalRotation.pitch(), lookVector);
         lookVector.normalize();
 
-        Vector3d searchCenter = new Vector3d(playerTransform.getPosition()).add(new Vector3d(lookVector).mul(3.0));
-        SpatialResource<Ref<EntityStore>, EntityStore> spatial = store.getResource(EntityModule.get().getEntitySpatialResourceType());
-
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> nearbyEntities = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        spatial.getSpatialStructure().collect(searchCenter, DASH_RANGE, nearbyEntities);
-
-        Ref<EntityStore> targetRef = null;
-        for (Ref<EntityStore> entity : nearbyEntities) {
-            if (entity != null && entity.isValid() && !entity.equals(playerEntityRef)) {
-                targetRef = entity;
-                break;
-            }
-        }
+        Ref<EntityStore> targetRef = TargetUtils.getTargetInLineOfSight(playerEntityRef, store, DASH_RANGE, 45.0);
 
         if (targetRef == null) {
-            playerRef.sendMessage(Message.raw(" Dynamic Entry failed: no target within range.").color(Color.GRAY));
+            playerRef.sendMessage(Message.raw(" Dynamic Entry falhou: nenhum alvo ao alcance.").color(Color.GRAY));
             return;
         }
 
-        playerRef.sendMessage(Message.raw(" Dynamic Entry!").color(Color.GREEN));
+        playerRef.sendMessage(Message.raw(" DYNAMIC ENTRY!").color(Color.GREEN));
 
         final Ref<EntityStore> finalTargetRef = targetRef;
-        float damage = getDamageForPlayer(playerRef);
+        final float damage = getDamageForPlayer(playerRef);
+        float currentYawDegrees = (float) Math.toDegrees(originalRotation.yaw());
 
-        AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, "Kick", true, store);
+        // ==========================================
+        // FASE 1: WIND-UP / CARGA (Delay Inicial)
+        // ==========================================
+        AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, null, "Kick", true, store);
+        CameraUtil.setCinematicCamera(playerRef, 2.8f, currentYawDegrees - 20.0f, -10.0f);
 
-        Vector3d dashDirection = new Vector3d(lookVector.x, 0.1, lookVector.z).normalize().mul(22.0);
-        applyVelocity(store, playerEntityRef, dashDirection);
+        applyVelocityInstruction(store, playerEntityRef, new Vector3d(0, 3.5, 0), ChangeVelocityType.Set);
 
+        // ==========================================
+        // FASE 2: DASH PRINCIPAL & TRACKING CAM (120ms depois)
+        // ==========================================
+        SCHEDULER.schedule(() -> {
+            world.execute(() -> {
+                if (!playerEntityRef.isValid()) return;
+
+                CameraUtil.setCinematicCamera(playerRef, 5.5f, currentYawDegrees + 50.0f, -18.0f);
+
+                Vector3d attackerDash = new Vector3d(lookVector.x * 38.0, 0.5, lookVector.z * 38.0);
+                applyVelocityInstruction(store, playerEntityRef, attackerDash, ChangeVelocityType.Set);
+            });
+        }, 120, TimeUnit.MILLISECONDS);
+
+        // ==========================================
+        // FASE 3: IMPACTO & FINISHER (300ms depois do arranque)
+        // ==========================================
         SCHEDULER.schedule(() -> {
             world.execute(() -> {
                 if (!playerEntityRef.isValid() || !finalTargetRef.isValid()) {
-                    resetToIdleAnimation(playerEntityRef, store);
+                    CameraUtil.resetCamera(playerRef);
+                    AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, (String) null, true, store);
                     return;
                 }
 
                 TransformComponent targetTrans = store.getComponent(finalTargetRef, TransformComponent.getComponentType());
                 if (targetTrans == null) {
-                    resetToIdleAnimation(playerEntityRef, store);
+                    CameraUtil.resetCamera(playerRef);
+                    AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, (String) null, true, store);
                     return;
                 }
 
-                Vector3d knockbackVector = new Vector3d(lookVector.x * 18.0, 4.0, lookVector.z * 18.0);
+                applyVelocityInstruction(store, playerEntityRef, new Vector3d(0, 0, 0), ChangeVelocityType.Set);
 
-                applyVelocity(store, finalTargetRef, knockbackVector);
+                CameraUtil.setCinematicCamera(playerRef, 3.0f, currentYawDegrees - 10.0f, -25.0f);
+                CameraUtil.applyCameraShake(playerRef, 3.0f, currentYawDegrees - 10.0f, -25.0f, 160);
+
+                Vector3d pushVector = new Vector3d(targetTrans.getPosition()).sub(playerTransform.getPosition());
+                pushVector.y = 0;
+
+                if (pushVector.lengthSquared() > 0.0001) {
+                    pushVector.normalize();
+                } else {
+                    float yaw = originalRotation.yaw();
+                    pushVector.set(-Math.sin(yaw), 0, Math.cos(yaw));
+                }
+
+                applyVelocityInstruction(store, finalTargetRef, new Vector3d(0, 14.0, 0), ChangeVelocityType.Set);
+                executeForcedKnockback(world, store, finalTargetRef, pushVector.x, pushVector.z, 12.0, 8);
 
                 applyDamage(playerRef, playerEntityRef, finalTargetRef, damage, store);
                 spawnImpactParticles(targetTrans.getPosition(), store, originalRotation);
 
-                resetToIdleAnimation(playerEntityRef, store);
+                SCHEDULER.schedule(() -> {
+                    world.execute(() -> {
+                        CameraUtil.resetCamera(playerRef);
+                        AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, (String) null, true, store);
+                    });
+                }, 220, TimeUnit.MILLISECONDS);
             });
-        }, 200, TimeUnit.MILLISECONDS);
+        }, 300, TimeUnit.MILLISECONDS);
     }
 
-    private void resetToIdleAnimation(Ref<EntityStore> playerEntityRef, Store<EntityStore> store) {
-        if (playerEntityRef != null && playerEntityRef.isValid()) {
-            AnimationUtils.stopAnimation(playerEntityRef, AnimationSlot.Action, true, store);
-            AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, "Idle", true, store);
+    private void executeForcedKnockback(World world, Store<EntityStore> store, Ref<EntityStore> targetRef, double dirX, double dirZ, double totalDistance, int steps) {
+        double stepDistance = totalDistance / steps;
+
+        for (int i = 1; i <= steps; i++) {
+            final int currentStep = i;
+            SCHEDULER.schedule(() -> {
+                world.execute(() -> {
+                    if (targetRef == null || !targetRef.isValid()) return;
+
+                    TransformComponent targetTrans = store.getComponent(targetRef, TransformComponent.getComponentType());
+                    if (targetTrans != null) {
+                        Vector3d currentPos = targetTrans.getPosition();
+                        Vector3d newPos = new Vector3d(
+                                currentPos.x + (dirX * stepDistance),
+                                currentPos.y,
+                                currentPos.z + (dirZ * stepDistance)
+                        );
+
+                        targetTrans.teleportPosition(newPos);
+                    }
+                });
+            }, currentStep * 20L, TimeUnit.MILLISECONDS);
         }
     }
 
-    private void applyVelocity(Store<EntityStore> store, Ref<EntityStore> entityRef, Vector3d velocity) {
+    private void applyVelocityInstruction(Store<EntityStore> store, Ref<EntityStore> entityRef, Vector3d velocity, ChangeVelocityType type) {
         if (entityRef == null || !entityRef.isValid()) return;
 
         try {
@@ -161,11 +211,7 @@ public class DynamicEntry implements Jutsu {
 
                 Velocity velComponent = runStore.getComponent(entityRef, Velocity.getComponentType());
                 if (velComponent != null) {
-                    velComponent.set(velocity.x, velocity.y, velocity.z);
-                } else {
-                    Velocity newVel = new Velocity();
-                    newVel.set(velocity.x, velocity.y, velocity.z);
-                    runStore.putComponent(entityRef, Velocity.getComponentType(), newVel);
+                    velComponent.addInstruction(velocity, null, type);
                 }
             });
 
@@ -198,13 +244,15 @@ public class DynamicEntry implements Jutsu {
     private void spawnImpactParticles(Vector3d pos, Store<EntityStore> store, Rotation3f rotation) {
         SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial = store.getResource(EntityModule.get().getPlayerSpatialResourceType());
 
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> playersToNotify = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        playerSpatial.getSpatialStructure().collect(pos, 75.0, playersToNotify);
+        if (playerSpatial != null) {
+            @SuppressWarnings("unchecked")
+            List<Ref<EntityStore>> playersToNotify = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
+            playerSpatial.getSpatialStructure().collect(pos, 75.0, playersToNotify);
 
-        if (!playersToNotify.isEmpty()) {
-            Vector3d particlePos = new Vector3d(pos.x, pos.y + 0.2, pos.z);
-            ParticleUtil.spawnParticleEffect(PARTICLE_ID, particlePos, rotation, playersToNotify, store);
+            if (!playersToNotify.isEmpty()) {
+                Vector3d particlePos = new Vector3d(pos.x, pos.y + 0.5, pos.z);
+                ParticleUtil.spawnParticleEffect(PARTICLE_ID, particlePos, rotation, playersToNotify, store);
+            }
         }
     }
 }

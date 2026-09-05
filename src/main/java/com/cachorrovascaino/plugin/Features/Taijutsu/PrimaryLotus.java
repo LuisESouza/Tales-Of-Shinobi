@@ -6,6 +6,8 @@ import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Systems.DamageTrackingSystem;
+import com.cachorrovascaino.plugin.Utils.CameraUtil;
+import com.cachorrovascaino.plugin.Utils.TargetUtils;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -91,21 +93,7 @@ public class PrimaryLotus implements Jutsu {
         PhysicsMath.vectorFromAngles(originalRotation.yaw(), originalRotation.pitch(), lookVector);
         lookVector.normalize();
 
-        // 1. Busca de alvo via Spatial
-        Vector3d searchCenter = new Vector3d(playerTransform.getPosition()).add(new Vector3d(lookVector).mul(4.0));
-        SpatialResource<Ref<EntityStore>, EntityStore> spatial = store.getResource(EntityModule.get().getEntitySpatialResourceType());
-
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> nearbyEntities = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        spatial.getSpatialStructure().collect(searchCenter, DASH_RANGE, nearbyEntities);
-
-        Ref<EntityStore> targetRef = null;
-        for (Ref<EntityStore> entity : nearbyEntities) {
-            if (entity != null && entity.isValid() && !entity.equals(playerEntityRef)) {
-                targetRef = entity;
-                break;
-            }
-        }
+        Ref<EntityStore> targetRef = TargetUtils.getTargetInLineOfSight(playerEntityRef, store, DASH_RANGE, 45.0);
 
         if (targetRef == null) {
             playerRef.sendMessage(Message.raw(" Omote Renge failed: no target within range.").color(Color.GRAY));
@@ -116,31 +104,41 @@ public class PrimaryLotus implements Jutsu {
 
         final Ref<EntityStore> finalTargetRef = targetRef;
         final float damage = getDamageForPlayer(playerRef);
+        float currentYawDegrees = (float) Math.toDegrees(originalRotation.yaw());
 
-        // Dispara a animação "Kick" no momento em que conecta o Jutsu
-        AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, "Kick", true, store);
+        // ==========================================
+        // FASE 1: WIND-UP / CHUTE INICIAL (Take 1)
+        // ==========================================
+        CameraUtil.setCinematicCamera(playerRef, 3.0f, currentYawDegrees - 15.0f, -25.0f);
+        AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, null, "Kick", true, store);
 
-        // 2. Dash inicial usando o ChangeVelocityType.Set
-        Vector3d dashVelocity = new Vector3d(lookVector.x * 28.0, 2.0, lookVector.z * 28.0);
+        Vector3d dashVelocity = new Vector3d(lookVector.x * 22.0, 3.0, lookVector.z * 22.0);
         applyVelocityInstruction(store, playerEntityRef, dashVelocity, ChangeVelocityType.Set);
 
         SCHEDULER.schedule(() -> {
             world.execute(() -> {
                 if (!playerEntityRef.isValid() || !finalTargetRef.isValid()) {
-                    resetToIdleAnimation(playerEntityRef, store);
+                    CameraUtil.resetCamera(playerRef);
+                    AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, (String) null, true, store);
                     return;
                 }
 
-                final int totalAscendTicks = 12;
+                // ==========================================
+                // FASE 2: ASCENSÃO AÉREA (Take 2)
+                // ==========================================
+                CameraUtil.setCinematicCamera(playerRef, 7.0f, currentYawDegrees + 60.0f, -10.0f);
+
+                final int totalAscendTicks = 16;
                 final int[] currentTick = {0};
-                final double ASCENT_SPEED = 22.0;
+                final double ASCENT_SPEED = 18.0;
 
                 final ScheduledFuture<?>[] ascendTask = new ScheduledFuture<?>[1];
                 ascendTask[0] = SCHEDULER.scheduleAtFixedRate(() -> {
                     world.execute(() -> {
                         if (!playerEntityRef.isValid() || !finalTargetRef.isValid()) {
                             if (ascendTask[0] != null) ascendTask[0].cancel(false);
-                            resetToIdleAnimation(playerEntityRef, store);
+                            CameraUtil.resetCamera(playerRef);
+                            AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, (String) null, true, store);
                             return;
                         }
 
@@ -159,23 +157,29 @@ public class PrimaryLotus implements Jutsu {
 
                         if (currentTick[0] >= totalAscendTicks) {
                             if (ascendTask[0] != null) ascendTask[0].cancel(false);
-                            startPileDriver(world, store, playerRef, playerEntityRef, finalTargetRef, lookVector, originalRotation, damage);
+                            startPileDriver(world, store, playerRef, playerEntityRef, finalTargetRef, lookVector, originalRotation, damage, currentYawDegrees);
                         }
                     });
                 }, 0, 50, TimeUnit.MILLISECONDS);
             });
-        }, 150, TimeUnit.MILLISECONDS);
+        }, 180, TimeUnit.MILLISECONDS);
     }
 
-    private void startPileDriver(World world, Store<EntityStore> store, PlayerRef playerRef, Ref<EntityStore> attacker, Ref<EntityStore> victim, Vector3d lookVector, Rotation3f rotation, float damage) {
-        final double DESCENT_SPEED = -36.0;
+    private void startPileDriver(World world, Store<EntityStore> store, PlayerRef playerRef, Ref<EntityStore> attacker, Ref<EntityStore> victim, Vector3d lookVector, Rotation3f rotation, float damage, float currentYawDegrees) {
+        // ==========================================
+        // FASE 3: QUEDA / MERGULHO (Take 3)
+        // ==========================================
+        CameraUtil.setCinematicCamera(playerRef, 6.0f, currentYawDegrees - 30.0f, 35.0f);
+
+        final double DESCENT_SPEED = -30.0;
         final ScheduledFuture<?>[] descendTask = new ScheduledFuture<?>[1];
 
         descendTask[0] = SCHEDULER.scheduleAtFixedRate(() -> {
             world.execute(() -> {
                 if (!attacker.isValid() || !victim.isValid()) {
                     if (descendTask[0] != null) descendTask[0].cancel(false);
-                    resetToIdleAnimation(attacker, store);
+                    CameraUtil.resetCamera(playerRef);
+                    AnimationUtils.playAnimation(attacker, AnimationSlot.Action, (String) null, true, store);
                     return;
                 }
 
@@ -189,33 +193,52 @@ public class PrimaryLotus implements Jutsu {
                 if (victimTrans == null) return;
 
                 Vector3d currentPos = victimTrans.getPosition();
-
                 boolean hitGround = checkGroundImpact(currentPos, DESCENT_SPEED * 0.05);
 
                 if (hitGround) {
                     if (descendTask[0] != null) descendTask[0].cancel(false);
 
+                    // ==========================================
+                    // FASE 4: IMPACTO NO SOLO (Take 4)
+                    // ==========================================
                     applyVelocityInstruction(store, attacker, new Vector3d(0, 0, 0), ChangeVelocityType.Set);
                     applyVelocityInstruction(store, victim, new Vector3d(0, 0, 0), ChangeVelocityType.Set);
 
                     teleportEntity(world, store, victim, currentPos, rotation);
                     teleportEntity(world, store, attacker, new Vector3d(currentPos).add(0.0, 0.2, 0.0), rotation);
 
+                    CameraUtil.setCinematicCamera(playerRef, 3.2f, currentYawDegrees, -25.0f);
+                    CameraUtil.applyCameraShake(playerRef, 3.2f, currentYawDegrees, -25.0f, 180);
+
                     applyDamage(playerRef, attacker, victim, damage, store);
                     spawnImpactParticles(currentPos, store, rotation);
 
-                    // Cancela o "Kick" e volta para o "Idle" no impacto com o solo
-                    resetToIdleAnimation(attacker, store);
+                    // ==========================================
+                    // FASE 5: RECUO DE SALTO PARA TRÁS (Take 5)
+                    // ==========================================
+                    SCHEDULER.schedule(() -> {
+                        world.execute(() -> {
+                            if (!attacker.isValid()) return;
+
+                            Vector3d backDash = new Vector3d(-lookVector.x * 14.0, 6.5, -lookVector.z * 14.0);
+                            applyVelocityInstruction(store, attacker, backDash, ChangeVelocityType.Set);
+
+                            CameraUtil.setCinematicCamera(playerRef, 6.0f, currentYawDegrees + 20.0f, -10.0f);
+
+                            AnimationUtils.playAnimation(attacker, AnimationSlot.Action, (String) null, true, store);
+                            AnimationUtils.playAnimation(attacker, AnimationSlot.Action, null, "Ninja", true, store);
+
+                            SCHEDULER.schedule(() -> {
+                                world.execute(() -> {
+                                    CameraUtil.resetCamera(playerRef);
+                                    AnimationUtils.playAnimation(attacker, AnimationSlot.Action, (String) null, true, store);
+                                });
+                            }, 3000, TimeUnit.MILLISECONDS);
+                        });
+                    }, 90, TimeUnit.MILLISECONDS);
                 }
             });
         }, 0, 50, TimeUnit.MILLISECONDS);
-    }
-
-    private void resetToIdleAnimation(Ref<EntityStore> playerEntityRef, Store<EntityStore> store) {
-        if (playerEntityRef != null && playerEntityRef.isValid()) {
-            AnimationUtils.stopAnimation(playerEntityRef, AnimationSlot.Action, true, store);
-            AnimationUtils.playAnimation(playerEntityRef, AnimationSlot.Action, "Idle", true, store);
-        }
     }
 
     private void syncTargetPosition(Store<EntityStore> store, Ref<EntityStore> attackerRef, Ref<EntityStore> victimRef, Vector3d lookVector) {
@@ -308,20 +331,22 @@ public class PrimaryLotus implements Jutsu {
     private void spawnParticleRing(Vector3d center, double radius, int points, Store<EntityStore> store, Rotation3f rotation) {
         SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial = store.getResource(EntityModule.get().getPlayerSpatialResourceType());
 
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> playersToNotify = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        playerSpatial.getSpatialStructure().collect(center, 75.0, playersToNotify);
+        if (playerSpatial != null) {
+            @SuppressWarnings("unchecked")
+            List<Ref<EntityStore>> playersToNotify = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
+            playerSpatial.getSpatialStructure().collect(center, 75.0, playersToNotify);
 
-        if (playersToNotify.isEmpty()) return;
+            if (!playersToNotify.isEmpty()) {
+                double increment = (2 * Math.PI) / points;
+                for (int i = 0; i < points; i++) {
+                    double angle = i * increment;
+                    double x = center.x + (radius * Math.cos(angle));
+                    double y = center.y;
+                    double z = center.z + (radius * Math.sin(angle));
 
-        double increment = (2 * Math.PI) / points;
-        for (int i = 0; i < points; i++) {
-            double angle = i * increment;
-            double x = center.x + (radius * Math.cos(angle));
-            double y = center.y;
-            double z = center.z + (radius * Math.sin(angle));
-
-            ParticleUtil.spawnParticleEffect(PARTICLE_ID, new Vector3d(x, y, z), rotation, playersToNotify, store);
+                    ParticleUtil.spawnParticleEffect(PARTICLE_ID, new Vector3d(x, y, z), rotation, playersToNotify, store);
+                }
+            }
         }
     }
 

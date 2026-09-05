@@ -4,27 +4,28 @@ import com.cachorrovascaino.plugin.Abstractions.SkillType;
 
 public enum JutsuType {
 
-    //NINJUTSU
-    SUBSTITUTION("substitution_jutsu", "Substitution", SkillType.NINJUTSU, 0, 0, 10, 0, 0, 0, 2, 10.0f, 10),
-    SHADOW_CLONE("shadow_clone", "Kage Bunshin", SkillType.NINJUTSU, 0, 0, 15, 0, 0, 5, 5, 25.0f, 15),
-    FIREBALL("fireball_jutsu", "Goukakyuu no Jutsu", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 40.0f, 20),
-    WATERBALL("waterball_jutsu", "Suiryūdan no Jutsu", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 40.0f, 20),
+    // NINJUTSU
+    WATER_WALK("water_walk", "Suimen Hokō no Gyō", SkillType.NINJUTSU, 0, 0, 10, 0, 0, 0, 1, 10.0f, 4),
+    SUBSTITUTION("substitution_jutsu", "Kawarimi no Jutsu", SkillType.NINJUTSU, 0, 0, 10, 0, 0, 0, 2, 10.0f, 10),
+    SHADOW_CLONE("shadow_clone", "Kage Bunshin no Jutsu", SkillType.NINJUTSU, 0, 0, 15, 0, 0, 5, 5, 25.0f, 15),
+    FIREBALL("fireball_jutsu", "Katon: Gōkakyū no Jutsu", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 40.0f, 20),
+    WATERBALL("waterball_jutsu", "Suiton: Suiryūdan no Jutsu", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 40.0f, 20),
     METEORO("tengai_shinsei", "Tengai Shinsei", SkillType.NINJUTSU, 0, 0, 50, 0, 0, 0, 10, 50.0f, 25),
-    DOTONWALL("doton_wall", "Doton Wall", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 25.0f, 8),
-    HEAL_JUTSU("mystical_palm_heal_jutsu", "Palm Heal", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 5.0f, 8),
+    DOTONWALL("doton_wall", "Doton: Doryūheki", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 25.0f, 8),
+    HEAL_JUTSU("mystical_palm_heal_jutsu", "Shōsen Jutsu", SkillType.NINJUTSU, 0, 0, 25, 0, 0, 0, 10, 5.0f, 8),
 
 
-    // TAIJUTSUS (Requer Taijutsu/Stamina/Speed, Custa Stamina)
-    LEAF_HURRICANE("leaf_hurricane", "Leaf Hurricane", SkillType.TAIJUTSU, 10, 0, 0, 0, 5, 10, 5, 15.0f, 8),
-    DYNAMIC_ENTRY("dynamic_entry", "Dainamikku Entorī", SkillType.TAIJUTSU, 15, 0, 0, 0, 10, 20, 10, 15.0f, 8),
-    LION_COMBO("lion_combo", "Shishi Rendan", SkillType.TAIJUTSU, 25, 0, 0, 0, 15, 50, 10, 25.0f, 10),
-    PRIMARY_LOTUS("primary_lotus", "Omote Renge", SkillType.TAIJUTSU, 40, 0, 0, 0, 40, 80, 10, 45.0f, 12),
+    // TAIJUTSUS (resourceCost representa a % da stamina máxima: 0.15f = 15%, 0.20f = 20%)
+    LEAF_HURRICANE("leaf_hurricane", "Konoha Senpū", SkillType.TAIJUTSU, 10, 0, 0, 0, 5, 10, 5, 0.15f, 8),
+    DYNAMIC_ENTRY("dynamic_entry", "Dainamikku Entorī", SkillType.TAIJUTSU, 15, 0, 0, 0, 10, 20, 10, 0.20f, 8),
+    LION_COMBO("lion_combo", "Shishi Rendan", SkillType.TAIJUTSU, 25, 0, 0, 0, 15, 50, 10, 0.25f, 10),
+    PRIMARY_LOTUS("primary_lotus", "Omote Renge", SkillType.TAIJUTSU, 40, 0, 0, 0, 40, 80, 10, 0.40f, 12),
 
 
     // GENJUTSU
-    KOKUANGYO("kokuangyo_genjutsu", "Kokuangyo", SkillType.GENJUTSU, 0, 20, 20, 0, 0, 0, 10, 45.0f, 12),
-    NEHAN_SHOJO("nehan_shojo_genjutsu", "Nehan Shojo", SkillType.GENJUTSU, 0, 20, 20, 0, 0, 0, 10, 45.0f, 12),
-    KASUMI_JUSHI("kasumi_jushi_genjutsu", "Kasumi Jushi", SkillType.GENJUTSU, 0, 20, 20, 0, 0, 0, 10, 45.0f, 12);
+    KOKUANGYO("kokuangyo_genjutsu", "Kokuangyo no Jutsu", SkillType.GENJUTSU, 0, 20, 20, 0, 0, 0, 10, 45.0f, 12),
+    NEHAN_SHOJO("nehan_shojo_genjutsu", "Nehan Shōjō no Jutsu", SkillType.GENJUTSU, 0, 20, 20, 0, 0, 0, 10, 45.0f, 12),
+    KASUMI_JUSHI("kasumi_jushi_genjutsu", "Kasumi Jūshi no Jutsu", SkillType.GENJUTSU, 0, 20, 20, 0, 0, 0, 10, 45.0f, 12);
 
     private final String id;
     private final String name;

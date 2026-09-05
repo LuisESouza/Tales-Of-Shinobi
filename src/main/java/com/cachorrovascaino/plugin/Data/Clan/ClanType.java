@@ -3,35 +3,43 @@ package com.cachorrovascaino.plugin.Data.Clan;
 import java.util.List;
 
 public enum ClanType {
-    NONE("Nenhum", "Sem clã definido.", 0.0f, 0.0f, 1.0f, List.of()),
+    NONE("None", "No clan defined.", 0.0f, 0.0f, 1.0f, List.of()),
 
-    UCHIHA("Uchiha", "Mestres do Katon com excelente controle de Chakra e Dōjutsu evolutivo.", 0.0f, 25.0f, 1.2f, List.of(
-            new ClanSkill("sharingan_1", "Sharingan (1 Tomoe)", "Melhora percepção e esquiva básica.", 20.0f, 140.0f, 15, 25, 10,  null, false),
+    UCHIHA("Uchiha", "Masters of Fire Release with excellent Chakra control and evolving Dōjutsu.", 0.0f, 25.0f, 1.2f, List.of(
+            new ClanSkill("sharingan_1", "Sharingan (1 Tomoe)", "Enhances perception and basic evasion.", 20.0f, 140.0f, 15, 25, 10, null, false),
 
-            new ClanSkill("sharingan_2", "Sharingan (2 Tomoes)", "Permite antecipar movimentos e copiar técnicas simples.", 20.0f, 200.0f, 30, 45, 20,  "sharingan_1", false),
+            new ClanSkill("sharingan_2", "Sharingan (2 Tomoes)", "Allows predicting movements and copying simple techniques.", 20.0f, 200.0f, 30, 45, 20, "sharingan_1", false),
 
-            new ClanSkill("sharingan_3", "Sharingan (3 Tomoes)", "Percepção máxima e domínio completo do dōjutsu base.", 20.0f, 320.0f, 40, 55, 30, "sharingan_2", false),
+            new ClanSkill("sharingan_3", "Sharingan (3 Tomoes)", "Maximum perception and complete mastery of the base dōjutsu.", 20.0f, 320.0f, 40, 55, 30, "sharingan_2", false),
 
-            new ClanSkill("mangekyou", "Mangekyō Sharingan", "Desperta os poderes ocluares supremos do clã.", 20.0f, 420.0f, 60, 75, 50,  "sharingan_3", true),
+            new ClanSkill("mangekyou", "Mangekyō Sharingan", "Awakens the supreme ocular powers of the clan.", 20.0f, 420.0f, 60, 75, 50, "sharingan_3", true),
 
-            new ClanSkill("susanoo", "Susanoo", "Invocação da armadura humanoide de chakra supremo.", 10.0f, 0.0f, 0, 0, 0,  "mangekyou", true)
+            new ClanSkill("susanoo", "Susanoo", "Summons a humanoid armor of supreme chakra.", 10.0f, 0.0f, 0, 0, 0, "mangekyou", true),
+
+            new ClanSkill("kamui_behind_teleport", "Kamui: Temporal Ambush", "Teleports behind the targeted enemy through space-time.", 100.0f, 450.0f, 0, 80, 0, "mangekyou", true),
+
+            new ClanSkill("kamui_intangibility", "Kamui: Intangibility", "Renders the body intangible, allowing attacks and physical matter to pass through.", 200.0f, 1000.0f, 0, 90, 0, "mangekyou", true),
+
+            new ClanSkill("kotoamatsukami_tether", "Kotoamatsukami: Optical Tether", "Binds target with invisible chakra tether that forces proximity.", 120.0f, 500.0f, 0, 70, 90, "mangekyou", true),
+
+            new ClanSkill("kotoamatsukami_blindspot", "Kotoamatsukami: Sensory Blindspot", "Alters target perception, making you completely invisible to them.", 130.0f, 550.0f, 0, 70, 95, "mangekyou", true)
     )),
 
-    HYUGA("Hyūga", "Especialistas em Taijutsu e controle de pontos de pressão.", 20.0f, 10.0f, 1.1f, List.of(
+    HYUGA("Hyuga", "Specialists in Taijutsu and pressure point control.", 20.0f, 10.0f, 1.1f, List.of(
 
-            new ClanSkill("byakugan", "Byakugan", "Visão de 360 graus e leitura do sistema de chakra.", 15.0f, 50.0f, 0, 0, 0, null, false),
+            new ClanSkill("byakugan", "Byakugan", "Provides 360-degree vision and perception of the chakra pathway system.", 15.0f, 50.0f, 0, 0, 0, null, false),
 
-            new ClanSkill("juken", "Jūken", "Golpes diretos aos tenketsus para bloquear chakra.", 20.0f, 60.0f, 45, 15, 15,"byakugan", false),
+            new ClanSkill("juken", "Jūken", "Direct strikes to tenketsu points to block the target's chakra.", 20.0f, 60.0f, 45, 15, 15, "byakugan", false),
 
-            new ClanSkill("kaiten", "Hakkeshō Kaiten", "Defesa absoluta giratória expelindo chakra.", 40.0f, 100.0f, 60, 30, 20, "byakugan", false)
+            new ClanSkill("kaiten", "Eight Trigrams Palms Revolving Heaven", "Absolute rotating defense that expels chakra from all pores.", 40.0f, 100.0f, 60, 30, 20, "byakugan", false)
     )),
 
-    UZUMAKI("Uzumaki", "Possuem vitalidade formidável e reservas imensas de Chakra.", 50.0f, 50.0f, 1.0f, List.of(
-            new ClanSkill("kongo_fusa", "Correntes de Selamento", "Correntes de chakra que restringem e drenam o alvo.", 35.0f, 150.0f, 20, 40, 30,  null, true)
+    UZUMAKI("Uzumaki", "Possess formidable vitality and immense Chakra reserves.", 50.0f, 50.0f, 1.0f, List.of(
+            new ClanSkill("kongo_fusa", "Adamantine Sealing Chains", "Chakra chains that bind, suppress, and drain the target.", 35.0f, 150.0f, 20, 40, 30, null, true)
     )),
 
-    SENJU("Senju", "Corpo abençoado com alta resistência e vigor físico.", 40.0f, 20.0f, 1.1f, List.of(
-            new ClanSkill("wood_release", "Mokuton", "Manipulação de árvores e elementos de madeira.", 50.0f, 180.0f, 40, 50, 20, null, true)
+    SENJU("Senju", "Blessed body with high endurance and physical vigor.", 40.0f, 20.0f, 1.1f, List.of(
+            new ClanSkill("wood_release", "Wood Release", "Manipulation of trees and wood elements.", 50.0f, 180.0f, 40, 50, 20, null, true)
     ));
 
     private final String displayName;

@@ -8,12 +8,8 @@ public class PlayerModelCosmetic extends CosmeticAsset {
 
     public static final BuilderCodec<PlayerModelCosmetic> CODEC;
 
-    // Caminho/id da MALHA 3D (ex: "Models/Face/Eyes_Sharingan.model").
-    // Se ficar null/vazio, o código que aplica o cosmético deve manter o modelo base do jogador
-    // e trocar apenas a textura.
     private String modelPath;
 
-    // Caminho/id da TEXTURA a aplicar sobre a malha (base ou customizada).
     private String texturePath;
 
     private PlayerModelCosmetic() {

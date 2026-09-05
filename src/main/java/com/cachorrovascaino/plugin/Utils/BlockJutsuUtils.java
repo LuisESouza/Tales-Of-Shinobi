@@ -22,10 +22,6 @@ public class BlockJutsuUtils {
 
     public static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
-    // ==========================================
-    // 1. MÉTODOS DE DIREÇÃO E VETORES
-    // ==========================================
-
     /**
      * Pega o vetor para onde o jogador está olhando no plano XZ (horizontal puro).
      */
@@ -57,9 +53,6 @@ public class BlockJutsuUtils {
         return new Vector3d(lookVector).cross(0.0, 1.0, 0.0).normalize();
     }
 
-    // ==========================================
-    // 2. GERADORES DE FORMAS GEOMÉTRICAS (GRID 2D)
-    // ==========================================
 
     /**
      * Algoritmo de Bresenham 2D: Gera uma linha contínua de blocos entre dois pontos (sem buracos).
@@ -115,9 +108,6 @@ public class BlockJutsuUtils {
         return circle;
     }
 
-    // ==========================================
-    // 3. MOTOR DE ANIMAÇÃO E RESTAURAÇÃO DE BLOCOS
-    // ==========================================
 
     /**
      * Constrói uma estrutura animada por camadas usando um ÚNICO bloco fixo (ex: "Rock_Stone", "Wood_Log_Oak").

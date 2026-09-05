@@ -13,8 +13,6 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-// Sem alterações nesta classe - nenhum bug encontrado aqui.
-// Incluída apenas para você ter o pacote completo e consistente.
 public abstract class CosmeticAsset implements JsonAssetWithMap<String, DefaultAssetMap<String, CosmeticAsset>> {
 
     public static final BuilderCodec<CosmeticAsset> ABSTRACT_CODEC;

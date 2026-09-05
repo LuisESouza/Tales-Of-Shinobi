@@ -6,6 +6,7 @@ import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Systems.DamageTrackingSystem;
+import com.cachorrovascaino.plugin.Utils.TargetUtils;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -28,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class LionCombo implements Jutsu {
@@ -39,7 +41,6 @@ public class LionCombo implements Jutsu {
     private static final float DAMAGE_PER_LEVEL = 3.0f;
     private static final String PARTICLE_ID = "Leaf_Hurricane_Circle";
 
-    // Configurações da duração do combo
     private static final int DURATION_SECONDS = 5;
     private static final int TICK_INTERVAL_MS = 500;
 
@@ -82,36 +83,34 @@ public class LionCombo implements Jutsu {
         long startTime = System.currentTimeMillis();
         long durationMs = DURATION_SECONDS * 1000L;
 
-        SCHEDULER.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                long elapsed = System.currentTimeMillis() - startTime;
+        final ScheduledFuture<?>[] taskHolder = new ScheduledFuture<?>[1];
 
-                if (elapsed >= durationMs || !playerEntityRef.isValid()) {
-                    throw new RuntimeException("LionCombo Finished");
+        taskHolder[0] = SCHEDULER.scheduleAtFixedRate(() -> {
+            long elapsed = System.currentTimeMillis() - startTime;
+
+            if (elapsed >= durationMs || !playerEntityRef.isValid()) {
+                if (taskHolder[0] != null) {
+                    taskHolder[0].cancel(false);
                 }
-
-                world.execute(() -> {
-                    if (!playerEntityRef.isValid()) return;
-
-                    TransformComponent transform = store.getComponent(playerEntityRef, TransformComponent.getComponentType());
-                    if (transform == null) return;
-
-                    Vector3d currentPos = transform.getPosition();
-
-                    spawnSpiralParticles(currentPos, store, transform);
-                    applyContinuousDamage(playerRef, playerEntityRef, currentPos, store);
-                });
+                return;
             }
+
+            world.execute(() -> {
+                if (!playerEntityRef.isValid()) return;
+
+                TransformComponent transform = store.getComponent(playerEntityRef, TransformComponent.getComponentType());
+                if (transform == null) return;
+
+                Vector3d currentPos = transform.getPosition();
+
+                spawnSpiralParticles(currentPos, store, transform);
+                applyContinuousDamage(playerRef, playerEntityRef, currentPos, store);
+            });
         }, 0, TICK_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
     private void applyContinuousDamage(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Vector3d center, Store<EntityStore> store) {
-        SpatialResource<Ref<EntityStore>, EntityStore> spatial = store.getResource(EntityModule.get().getEntitySpatialResourceType());
-
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> nearbyEntities = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        spatial.getSpatialStructure().collect(center, RADIUS, nearbyEntities);
+        List<Ref<EntityStore>> nearbyEntities = TargetUtils.getEntitiesInRadius(center, RADIUS, store);
 
         DamageCause damageCause = DamageCause.getAssetMap().getAsset("Physical");
         if (damageCause == null) {
@@ -136,22 +135,26 @@ public class LionCombo implements Jutsu {
             }
 
             CONSUME_METHOD.invoke(commandBuffer);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void spawnSpiralParticles(Vector3d center, Store<EntityStore> store, TransformComponent transform) {
         SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial = store.getResource(EntityModule.get().getPlayerSpatialResourceType());
 
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> playersToNotify = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        playerSpatial.getSpatialStructure().collect(center, 75.0, playersToNotify);
+        if (playerSpatial != null) {
+            @SuppressWarnings("unchecked")
+            List<Ref<EntityStore>> playersToNotify = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
+            playerSpatial.getSpatialStructure().collect(center, 75.0, playersToNotify);
 
-        if (playersToNotify.isEmpty()) return;
+            if (!playersToNotify.isEmpty()) {
+                Vector3d groundPos = new Vector3d(center.x, center.y + 0.2, center.z);
+                ParticleUtil.spawnParticleEffect(PARTICLE_ID, groundPos, transform.getRotation(), playersToNotify, store);
 
-        Vector3d groundPos = new Vector3d(center.x, center.y + 0.2, center.z);
-        ParticleUtil.spawnParticleEffect(PARTICLE_ID, groundPos, transform.getRotation(), playersToNotify, store);
-
-        Vector3d topPos = new Vector3d(center.x, center.y + 5.2, center.z);
-        ParticleUtil.spawnParticleEffect(PARTICLE_ID, topPos, transform.getRotation(), playersToNotify, store);
+                Vector3d topPos = new Vector3d(center.x, center.y + 5.2, center.z);
+                ParticleUtil.spawnParticleEffect(PARTICLE_ID, topPos, transform.getRotation(), playersToNotify, store);
+            }
+        }
     }
 }

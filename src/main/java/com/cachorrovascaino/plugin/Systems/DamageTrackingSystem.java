@@ -1,5 +1,6 @@
 package com.cachorrovascaino.plugin.Systems;
 
+import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -52,9 +53,10 @@ public class DamageTrackingSystem extends DamageEventSystem {
         UUID attackerUUID = attackerUuidComp.getUuid();
         UUID targetUUID = targetUuidComp.getUuid();
 
-        int taijutsu = Main.getDataManager().getPlayerData(attackerUUID).getTaijutsu();
+        PlayerData attackerData = Main.getDataManager().getPlayerData(attackerUUID);
+        int taijutsu = (attackerData != null) ? attackerData.getTaijutsu() : 0;
 
-        if(taijutsu > 0 && damage.getAmount() > 0.0f){
+        if (taijutsu > 0 && damage.getAmount() > 0.0f) {
             float taijutsuBonus = taijutsu * 2.5f;
             float taijutsuNow = damage.getAmount();
             damage.setAmount(taijutsuNow + taijutsuBonus);

@@ -9,6 +9,14 @@ import java.util.Map;
 
 public class PlayerData {
 
+    // --- ESTADOS DO DŌJUTSU ---
+    public enum DojutsuState {
+        NONE,
+        SHARINGAN,
+        MANGEKYO,
+        BYAKUGAN
+    }
+
     private String name;
     private String uuid;
     private String village;
@@ -25,9 +33,10 @@ public class PlayerData {
     private String originalEyesColor = "";
 
     // --- DŌJUTSU / TRANSFORMAÇÕES VISUAIS DE OLHOS ---
-    private boolean eyeDojutsuActive = false;
+    private DojutsuState activeDojutsu = DojutsuState.NONE;
     private int eyeStage = 1;
     private String eyeDojutsuType = "NONE";
+    private String mangekyouType = null;
 
     // --- PROGRESSÃO GERAL DO JOGADOR ---
     private int currentLevel;
@@ -61,9 +70,9 @@ public class PlayerData {
 
     // --- JUTSUS DESBLOQUEADOS E HOTBAR ---
     private List<String> unlockedJutsus = new ArrayList<>();
-    private Map<String, String> equippedHotbar = new HashMap<>();
+    Map<String, String> equippedHotbar = new HashMap<>();
 
-    // --- CLAN JUTSUS
+    // --- CLAN JUTSUS ---
     private List<String> unlockedClanJutsu = new ArrayList<>();
     private Map<String, String> equippedClanHotbar = new HashMap<>();
 
@@ -77,10 +86,9 @@ public class PlayerData {
         this.ninjaRank = "Estudante";
         this.element = "Ray";
 
-        // Dōjutsu Base
-        this.eyeDojutsuActive = false;
-        this.eyeStage = 1;
+        // Dōjutsu Base & Mangekyō
         this.eyeDojutsuType = "NONE";
+        this.mangekyouType = null;
 
         // Progressão Geral
         this.currentLevel = 1;
@@ -116,27 +124,9 @@ public class PlayerData {
 
         this.unlockedClanJutsu = new ArrayList<>();
         this.equippedClanHotbar = new HashMap<>();
-
-
     }
 
-    // --- MÉTODOS DE CONTROLE DO DŌJUTSU & OLHOS ---
-    public void applyDojutsuEyes(String newEyesId, String newEyesColor) {
-        if (this.originalEyesId == null || this.originalEyesId.isEmpty()) {
-            this.originalEyesId = this.eyesId;
-        }
-        this.eyesId = newEyesId;
-        this.eyesColor = newEyesColor;
-    }
-
-    public void restoreOriginalEyes() {
-        if (this.originalEyesId != null && !this.originalEyesId.isEmpty()) {
-            this.eyesId = this.originalEyesId;
-        } else {
-            this.eyesId = "Medium_Eyes";
-        }
-    }
-
+    // --- PROGRESSÃO DE XP E PONTOS ---
     public boolean addXp(float amount) {
         if (currentLevel >= maxLevel) return false;
 
@@ -154,7 +144,7 @@ public class PlayerData {
         return leveledUp;
     }
 
-    public void addPoint(int point){
+    public void addPoint(int point) {
         this.availablePoints += point;
     }
 
@@ -197,8 +187,8 @@ public class PlayerData {
     }
 
     // UNLOCKED
-    public boolean hasUnlockClanSkill(String jutsuClanId){
-        if(unlockedClanJutsu == null) return false;
+    public boolean hasUnlockClanSkill(String jutsuClanId) {
+        if (unlockedClanJutsu == null) return false;
         return unlockedClanJutsu.contains(jutsuClanId);
     }
 
@@ -227,14 +217,17 @@ public class PlayerData {
     public void setOriginalEyesColor(String originalEyesColor) { this.originalEyesColor = originalEyesColor; }
 
     // --- DŌJUTSU GETTERS E SETTERS ---
-    public boolean isEyeDojutsuActive() { return eyeDojutsuActive; }
-    public void setEyeDojutsuActive(boolean eyeDojutsuActive) { this.eyeDojutsuActive = eyeDojutsuActive; }
+    public DojutsuState getActiveDojutsu() { return activeDojutsu; }
+    public void setActiveDojutsu(DojutsuState activeDojutsu) { this.activeDojutsu = activeDojutsu; }
 
     public int getEyeStage() { return eyeStage; }
     public void setEyeStage(int eyeStage) { this.eyeStage = eyeStage; }
 
     public String getEyeDojutsuType() { return eyeDojutsuType != null ? eyeDojutsuType : "NONE"; }
     public void setEyeDojutsuType(String eyeDojutsuType) { this.eyeDojutsuType = eyeDojutsuType; }
+
+    public String getMangekyouType() { return mangekyouType; }
+    public void setMangekyouType(String mangekyouType) { this.mangekyouType = mangekyouType; }
 
     // --- GETTERS E SETTERS GERAIS ---
     public String getName() { return name; }
@@ -302,7 +295,7 @@ public class PlayerData {
     public int getKekkeiGenkai() { return kekkeiGenkai; }
     public void setKekkeiGenkai(int kekkeiGenkai) { this.kekkeiGenkai = kekkeiGenkai; }
 
-    //----------------------------------------------------------------------------------------------------------------//
+    // --- JUTSUS & HOTBAR ---
     public Map<String, Integer> getJutsuLevels() {
         if (jutsuLevels == null) jutsuLevels = new HashMap<>();
         return jutsuLevels;
@@ -326,23 +319,23 @@ public class PlayerData {
         return equippedHotbar;
     }
     public void setEquippedHotbar(Map<String, String> equippedHotbar) { this.equippedHotbar = equippedHotbar; }
-    //----------------------------------------------------------------------------------------------------------------//
-    // Clan
-    public List<String> getUnlockedClanJutsu(){
-        if(unlockedClanJutsu == null) unlockedClanJutsu = new ArrayList<>();
+
+    // --- CLAN ---
+    public List<String> getUnlockedClanJutsu() {
+        if (unlockedClanJutsu == null) unlockedClanJutsu = new ArrayList<>();
         return unlockedClanJutsu;
     }
 
-    public void setUnlockedClanJutsu(List<String> unlockedClanJutsu){
+    public void setUnlockedClanJutsu(List<String> unlockedClanJutsu) {
         this.unlockedClanJutsu = unlockedClanJutsu;
     }
 
     public Map<String, String> getEquippedClanHotbar() {
-        if(equippedClanHotbar == null) equippedClanHotbar = new HashMap<>();
+        if (equippedClanHotbar == null) equippedClanHotbar = new HashMap<>();
         return equippedClanHotbar;
     }
 
-    public void setEquippedClanHotbar(Map<String, String> equippedClanHotbar){
+    public void setEquippedClanHotbar(Map<String, String> equippedClanHotbar) {
         this.equippedClanHotbar = equippedClanHotbar;
     }
 

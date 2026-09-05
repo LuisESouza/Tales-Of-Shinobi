@@ -5,6 +5,7 @@ import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Ui.Hud.JutsuEquippedHud;
 import com.cachorrovascaino.plugin.Ui.Hud.LevelHud;
 import com.cachorrovascaino.plugin.Utils.ChakraUtils;
+import com.cachorrovascaino.plugin.Utils.EyesUtils;
 import com.cachorrovascaino.plugin.Utils.PlayerStatUtils;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class PlayerListener {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static EyesUtils eyesUtils = new EyesUtils();
 
     public void register(EventRegistry registry) {
         try {
@@ -63,6 +65,8 @@ public class PlayerListener {
                 ChakraUtils.setChakra(pRef, playerData.getCurrentChakra());
             }
 
+            if(playerData == null) return;
+
             PlayerStatUtils.applyPlayerSpeed(
                     entityStore,
                     ref,
@@ -71,21 +75,34 @@ public class PlayerListener {
             );
 
             if (world != null) {
-                CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS, world).execute(() -> {
-                    try {
-                        if (pRef.isValid() && ref.isValid()) {
-                            Main.getJutsuManager().ensureChakraHudLoaded(pRef);
-                            Main.getJutsuManager().updateChakraHud(pRef);
+                try {
+                    if (pRef.isValid() && ref.isValid()) {
+                        Main.getJutsuManager().ensureChakraHudLoaded(pRef);
+                        Main.getJutsuManager().updateChakraHud(pRef);
 
-                            if (player != null) {
-                                LevelHud.update(player, pRef);
-                                JutsuEquippedHud.show(player, pRef);
+                        if ("Hyuga".equalsIgnoreCase(playerData.getClan())) {
+                            eyesUtils.captureOriginalEyesIfNeeded(pRef, playerData);
+
+                            if (playerData.getEyeDojutsuType() == null || playerData.getEyeDojutsuType().isEmpty() || "NONE".equalsIgnoreCase(playerData.getEyeDojutsuType())) {
+                                playerData.setEyeDojutsuType("Byakugan_HD");
                             }
+                            if (playerData.getEyeStage() <= 0) {
+                                playerData.setEyeStage(1);
+                            }
+
+                            eyesUtils.updateHytalePlayerEyes(world, pRef, playerData.getEyeDojutsuType(), playerData.getEyesColor());
+
+                            Main.getDataManager().savePlayer(uuid);
                         }
-                    } catch (Exception e) {
-                        LOGGER.atWarning().log("Erro ao inicializar HUDs e Stats no PlayerReady: " + e.getMessage());
+
+                        if (player != null) {
+                            LevelHud.update(player, pRef);
+                            JutsuEquippedHud.show(player, pRef);
+                        }
                     }
-                });
+                } catch (Exception e) {
+                    LOGGER.atWarning().log("Erro ao inicializar HUDs e Stats no PlayerReady: " + e.getMessage());
+                }
             }
         } else {
             LOGGER.atWarning().log("PlayerRef veio NULO do EntityStore no PlayerReadyEvent!");

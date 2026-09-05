@@ -81,10 +81,6 @@ public class Kokuangyo implements Jutsu {
 
         boolean isSelfTest = false;
 
-//        if (targetEntityRef == null) { targetEntityRef = playerEntityRef; targetPlayerRef = playerRef; isSelfTest =
-//            true; playerRef.sendMessage(Message.raw("[Self-Test Mode] Applying Genjutsu on
-//            yourself.").color(Color.YELLOW)); }
-
         if (targetPlayerRef != null) {
             PacketHandler targetPacketHandler = targetPlayerRef.getPacketHandler();
             WeatherUtils.applyPlayerWeather(targetPlayerRef, targetPacketHandler, GENJUTSU_WEATHER);
@@ -121,14 +117,6 @@ public class Kokuangyo implements Jutsu {
 
                 NPCEntity npcEntity = store.getComponent(mobRef, NPCEntity.getComponentType());
                 if (npcEntity == null) return;
-
-                Role role = npcEntity.getRole();
-                if (role != null) {
-                    role.setMarkedTarget("target", null);
-                    role.setMarkedTarget("combatTarget", null);
-                    role.setMarkedTarget("player", null);
-                    role.getStateSupport().setState(mobRef, "Idle", null, store);
-                }
             });
         }, 0, 200, TimeUnit.MILLISECONDS);
 

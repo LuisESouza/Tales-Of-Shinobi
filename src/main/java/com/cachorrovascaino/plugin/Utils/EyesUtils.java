@@ -3,6 +3,7 @@ package com.cachorrovascaino.plugin.Utils;
 import com.cachorrovascaino.plugin.Cosmetics.CosmeticAsset;
 import com.cachorrovascaino.plugin.Cosmetics.EyeAttachmentCosmetic;
 import com.cachorrovascaino.plugin.Data.PlayerData;
+import com.cachorrovascaino.plugin.Main;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -16,6 +17,7 @@ import com.hypixel.hytale.server.core.cosmetics.PlayerSkinPartTexture;
 import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.modules.entity.player.PlayerSkinComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.ArrayList;
@@ -28,96 +30,104 @@ public class EyesUtils {
      * Atualiza os olhos do jogador aceitando tanto cosméticos customizados do mod
      * quanto o fallback vanilla sem quebrar o ECS.
      */
-    public void updateHytalePlayerEyes(PlayerRef playerRef, String eyesId, String eyesColor) {
-        if (playerRef == null) return;
+    public void updateHytalePlayerEyes(World world, PlayerRef playerRef, String eyesId, String eyesColor) {
+        if (world == null || playerRef == null) return;
 
         Ref<EntityStore> ref = playerRef.getReference();
         if (ref == null || !ref.isValid()) return;
-        Store<EntityStore> store = ref.getStore();
 
-        ModelComponent modelComponent = store.getComponent(ref, ModelComponent.getComponentType());
-        if (modelComponent == null || modelComponent.getModel() == null) return;
-
-        Model currentModel = modelComponent.getModel();
-
-        CosmeticAsset customAsset = null;
-        try {
-            DefaultAssetMap<String, CosmeticAsset> map = CosmeticAsset.getAssetMap();
-            if (map != null && eyesId != null) {
-                customAsset = map.getAssetMap().get(eyesId);
-            }
-        } catch (Exception ignored) {}
-
-        Model newModel = null;
-
-        if (customAsset instanceof EyeAttachmentCosmetic customEye) {
-            PlayerSkinComponent skinCompForBase = store.getComponent(ref, PlayerSkinComponent.getComponentType());
-            Model freshBaseModel = currentModel;
-            List<ModelAttachment> nativeAttachments = new ArrayList<>();
-
-            if (skinCompForBase != null) {
-                try {
-                    freshBaseModel = CosmeticsModule.get().createModel(skinCompForBase.getPlayerSkin());
-                } catch (Exception e) {
-                    System.err.println("[ClanManager]error CosmeticsModule: " + e.getMessage());
-                }
-                nativeAttachments = resolveNativeAttachments(skinCompForBase.getPlayerSkin());
-            }
-
-            String eyeModel = customEye.getModel();
-            String eyeTexture = customEye.getTexture();
-
-            if(freshBaseModel == null){return;}
-
-            ModelAttachment eyeAttachment = new ModelAttachment(eyeModel, eyeTexture, freshBaseModel.getGradientSet(), null, 1.0);
-
-            List<ModelAttachment> allAttachments = new ArrayList<>(nativeAttachments);
-            allAttachments.add(eyeAttachment);
-
-            String modelAssetId = "Dojutsu_" + playerRef.getUuid() + "_" + freshBaseModel.getModelAssetId();
-            newModel = buildFinalModel(freshBaseModel, modelAssetId, allAttachments.toArray(new ModelAttachment[0]));
+        PlayerData playerData = Main.get().getDataManager().getPlayerData(playerRef.getUuid());
+        if (playerData != null && "Hyuga".equalsIgnoreCase(playerData.getClan())) {
+            eyesId = "Byakugan_HD";
         }
-        else {
-            PlayerSkinComponent skinComp = store.getComponent(ref, PlayerSkinComponent.getComponentType());
-            if (skinComp != null) {
-                PlayerSkin protocolSkin = skinComp.getPlayerSkin();
-                String targetAsset = (eyesId != null && !eyesId.isEmpty()) ? eyesId : "Plain_Eyes";
-                String finalEyeString = (eyesColor != null && !eyesColor.trim().isEmpty())
-                        ? targetAsset + "." + eyesColor.trim()
-                        : targetAsset;
 
-                String previousEyes = protocolSkin.eyes;
-                protocolSkin.eyes = finalEyeString;
+        final String targetEyesId = eyesId;
 
-                try {
-                    newModel = CosmeticsModule.get().createModel(protocolSkin);
-                    skinComp.setNetworkOutdated();
-                } catch (Exception e) {
-                    protocolSkin.eyes = "Medium_Eyes.Brown";
+        world.execute(() -> {
+            if (!ref.isValid()) return;
+
+            Store<EntityStore> store = ref.getStore();
+
+            ModelComponent modelComponent = store.getComponent(ref, ModelComponent.getComponentType());
+            if (modelComponent == null || modelComponent.getModel() == null) return;
+
+            Model currentModel = modelComponent.getModel();
+
+            CosmeticAsset customAsset = null;
+            try {
+                DefaultAssetMap<String, CosmeticAsset> map = CosmeticAsset.getAssetMap();
+                if (map != null && targetEyesId != null) {
+                    customAsset = map.getAssetMap().get(targetEyesId);
+                }
+            } catch (Exception ignored) {}
+
+            Model newModel = null;
+
+            if (customAsset instanceof EyeAttachmentCosmetic customEye) {
+                PlayerSkinComponent skinCompForBase = store.getComponent(ref, PlayerSkinComponent.getComponentType());
+                Model freshBaseModel = currentModel;
+                List<ModelAttachment> nativeAttachments = new ArrayList<>();
+
+                if (skinCompForBase != null) {
+                    try {
+                        freshBaseModel = CosmeticsModule.get().createModel(skinCompForBase.getPlayerSkin());
+                    } catch (Exception e) {
+                        System.err.println("[ClanManager]error CosmeticsModule: " + e.getMessage());
+                    }
+                    nativeAttachments = resolveNativeAttachments(skinCompForBase.getPlayerSkin());
+                }
+
+                String eyeModel = customEye.getModel();
+                String eyeTexture = customEye.getTexture();
+
+                if (freshBaseModel == null) { return; }
+
+                ModelAttachment eyeAttachment = new ModelAttachment(eyeModel, eyeTexture, freshBaseModel.getGradientSet(), null, 1.0);
+
+                List<ModelAttachment> allAttachments = new ArrayList<>(nativeAttachments);
+                allAttachments.add(eyeAttachment);
+
+                String modelAssetId = "Dojutsu_" + playerRef.getUuid() + "_" + freshBaseModel.getModelAssetId();
+                newModel = buildFinalModel(freshBaseModel, modelAssetId, allAttachments.toArray(new ModelAttachment[0]));
+            } else {
+                PlayerSkinComponent skinComp = store.getComponent(ref, PlayerSkinComponent.getComponentType());
+                if (skinComp != null) {
+                    PlayerSkin protocolSkin = skinComp.getPlayerSkin();
+                    String targetAsset = (targetEyesId != null && !targetEyesId.isEmpty()) ? targetEyesId : "Plain_Eyes";
+                    String finalEyeString = (eyesColor != null && !eyesColor.trim().isEmpty())
+                            ? targetAsset + "." + eyesColor.trim()
+                            : targetAsset;
+
+                    String previousEyes = protocolSkin.eyes;
+                    protocolSkin.eyes = finalEyeString;
+
                     try {
                         newModel = CosmeticsModule.get().createModel(protocolSkin);
                         skinComp.setNetworkOutdated();
-                    } catch (Exception ignored) {
-                        protocolSkin.eyes = previousEyes;
+                    } catch (Exception e) {
+                        protocolSkin.eyes = "Medium_Eyes.Brown";
+                        try {
+                            newModel = CosmeticsModule.get().createModel(protocolSkin);
+                            skinComp.setNetworkOutdated();
+                        } catch (Exception ignored) {
+                            protocolSkin.eyes = previousEyes;
+                        }
                     }
                 }
             }
-        }
 
-        if (newModel != null) {
-            store.putComponent(ref, ModelComponent.getComponentType(), new ModelComponent(newModel));
+            if (newModel != null) {
+                store.putComponent(ref, ModelComponent.getComponentType(), new ModelComponent(newModel));
 
-            PlayerSkinComponent skinComp = store.getComponent(ref, PlayerSkinComponent.getComponentType());
-            if (skinComp != null) {
-                skinComp.setNetworkOutdated();
+                PlayerSkinComponent skinComp = store.getComponent(ref, PlayerSkinComponent.getComponentType());
+                if (skinComp != null) {
+                    skinComp.setNetworkOutdated();
+                }
+            } else {
+                System.err.println("[ClanManager] Falha ao gerar o novo Model para o jogador.");
             }
-
-            System.out.println("[ClanManager] ModelComponent atualizado no ECS com sucesso para: " + eyesId);
-        } else {
-            System.err.println("[ClanManager] Falha ao gerar o novo Model para o jogador.");
-        }
+        });
     }
-
 
     private Model buildFinalModel(Model baseModel, String modelAssetId, ModelAttachment[] attachments) {
         return new Model(
@@ -146,13 +156,6 @@ public class EyesUtils {
         );
     }
 
-    /**
-     * Reconstrói cabelo, sobrancelha, pelo facial, calça, sobrecalça, camisa, jaqueta,
-     * tênis, luva, capa e acessórios (cabeça/rosto/orelha) como ModelAttachment explícitos,
-     * a partir dos campos nativos do PlayerSkin - replicando exatamente a lógica de
-     * HytaleCosmetic.createAttachment() do Wardrobe, já que CosmeticsModule.createModel()
-     * NÃO faz isso sozinho.
-     */
     private List<ModelAttachment> resolveNativeAttachments(PlayerSkin protocolSkin) {
         List<ModelAttachment> attachments = new ArrayList<>();
         CosmeticRegistry registry = CosmeticsModule.get().getRegistry();
@@ -181,7 +184,6 @@ public class EyesUtils {
         return attachments;
     }
 
-    /** Extrai o textureId (segunda parte, ex: "cor" em "id.cor") de um valor de skin com notação por ponto. */
     private String extractTextureId(String skinValue) {
         if (skinValue == null || skinValue.isEmpty()) return null;
         String[] parts = skinValue.split("\\.");
@@ -194,13 +196,6 @@ public class EyesUtils {
         }
     }
 
-    /**
-     * Resolve um único campo do PlayerSkin (ex: "Pants_A.Blue" ou "Pants_A.Blue.Style2")
-     * num ModelAttachment, replicando exatamente HytaleCosmetic.createAttachment():
-     * - idParts[0] = id da peça no registro de cosméticos
-     * - idParts[1] = id da textura/cor
-     * - idParts[2] = id do "option"/variante de estilo (opcional)
-     */
     private ModelAttachment resolveNativeAttachment(Map<String, PlayerSkinPart> registryMap, String skinValue) {
         if (skinValue == null || skinValue.isEmpty() || registryMap == null) return null;
 
@@ -212,7 +207,6 @@ public class EyesUtils {
         return resolveAttachmentFromParts(registryMap, id, textureId, optionId);
     }
 
-    /** Núcleo da resolução, já com id/textureId/optionId separados (usado tanto pro caso normal quanto pro caso especial de Face/Orelha/Boca). */
     private ModelAttachment resolveAttachmentFromParts(Map<String, PlayerSkinPart> registryMap, String id, String textureId, String optionId) {
         if (id == null || id.isEmpty() || registryMap == null) return null;
 
@@ -255,10 +249,6 @@ public class EyesUtils {
         return new ModelAttachment(model, texture, gradientSet, gradientId, 1.0);
     }
 
-    /**
-     * Captura o olho REAL do jogador (id + cor) direto do PlayerSkinComponent, na primeira
-     * vez que o Dōjutsu é ativado - só se ainda não tiver sido capturado.
-     */
     public void captureOriginalEyesIfNeeded(PlayerRef playerRef, PlayerData playerData) {
         if (playerData.getOriginalEyesId() != null && !playerData.getOriginalEyesId().isEmpty()) {
             return;

@@ -7,22 +7,21 @@ import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Systems.DamageTrackingSystem;
 import com.cachorrovascaino.plugin.Utils.ProjectileJutsuUtils;
+import com.cachorrovascaino.plugin.Utils.TargetUtils;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.modules.entity.EntityModule;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageCause;
 import com.hypixel.hytale.server.core.modules.physics.util.PhysicsMath;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
 
 import java.awt.Color;
@@ -116,11 +115,11 @@ public class MeteoroJutsu implements Jutsu {
     }
 
     private void spawnTargetIndicator(Vector3d impactPos, Store<EntityStore> store, Rotation3f rotation) {
-        SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial = store.getResource(EntityModule.get().getPlayerSpatialResourceType());
+        List<Ref<EntityStore>> nearbyEntities = TargetUtils.getEntitiesInRadius(impactPos, 85.0, store);
 
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> playersToNotify = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        playerSpatial.getSpatialStructure().collect(impactPos, 85.0, playersToNotify);
+        List<Ref<EntityStore>> playersToNotify = nearbyEntities.stream()
+                .filter(ref -> ref != null && ref.isValid() && store.getComponent(ref, PlayerRef.getComponentType()) != null)
+                .toList();
 
         if (!playersToNotify.isEmpty()) {
             Vector3d particlePos = new Vector3d(impactPos.x, impactPos.y + 0.2, impactPos.z);
@@ -137,11 +136,7 @@ public class MeteoroJutsu implements Jutsu {
     ) {
         if (!playerEntityRef.isValid()) return;
 
-        SpatialResource<Ref<EntityStore>, EntityStore> spatial = store.getResource(EntityModule.get().getEntitySpatialResourceType());
-
-        @SuppressWarnings("unchecked")
-        List<Ref<EntityStore>> nearbyEntities = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-        spatial.getSpatialStructure().collect(impactPos, AOE_RADIUS, nearbyEntities);
+        List<Ref<EntityStore>> nearbyEntities = TargetUtils.getEntitiesInRadius(impactPos, AOE_RADIUS, store);
 
         DamageCause damageCause = DamageCause.getAssetMap().getAsset("Fire");
         if (damageCause == null) {
@@ -150,17 +145,18 @@ public class MeteoroJutsu implements Jutsu {
 
         Damage.Source source = new Damage.EntitySource(playerEntityRef);
         int targetsHit = 0;
+        int playersHit = 0;
 
         try {
             @SuppressWarnings("unchecked")
             CommandBuffer<EntityStore> commandBuffer = (CommandBuffer<EntityStore>) TAKE_COMMAND_BUFFER_METHOD.invoke(store);
 
             for (Ref<EntityStore> targetRef : nearbyEntities) {
-                if (targetRef == null || !targetRef.isValid() || targetRef.equals(playerEntityRef)) {
-                    continue;
-                }
+                if (targetRef == null || !targetRef.isValid() || targetRef.equals(playerEntityRef)) {continue;}
 
-                if(damageCause == null){return;}
+                if (damageCause == null) return;
+
+                if (store.getComponent(targetRef, PlayerRef.getComponentType()) != null) {playersHit++;}
 
                 Damage damageEvent = new Damage(source, damageCause, aoeDamage);
                 damageEvent.putMetaObject(DamageTrackingSystem.RPG_DAMAGE_PROCESSED, false);
@@ -174,6 +170,6 @@ public class MeteoroJutsu implements Jutsu {
             e.printStackTrace();
         }
 
-        playerRef.sendMessage(Message.raw(" Tengai Shinsei! Impacto atingiu " + targetsHit + " alvo(s) na área.").color(Color.RED));
+        playerRef.sendMessage(Message.raw(" Tengai Shinsei! Impact hit " + targetsHit + " target(s) (" + playersHit + " player(s)) in the area.").color(Color.RED));
     }
 }

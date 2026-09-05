@@ -2,57 +2,41 @@ package com.cachorrovascaino.plugin.Features.Ninjutsu;
 
 import com.cachorrovascaino.plugin.Abstractions.Jutsu;
 import com.cachorrovascaino.plugin.Abstractions.SkillType;
+import com.cachorrovascaino.plugin.Data.Components.WaterWalk;
+import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
+import com.cachorrovascaino.plugin.Main;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import org.joml.Vector3d;
 
 public class WaterWalkJutsu implements Jutsu {
 
     public static final WaterWalkJutsu INSTANCE = new WaterWalkJutsu();
 
-    @Override public String getId() { return "suiton_water_walk"; }
-    @Override public String getDisplayName() { return "Suiton: Mizu Kinobori"; }
-    @Override public float getChakraCost() { return 15.0f; }
-    @Override public float getCooldown() { return 1.0f; }
-    @Override public SkillType getType() {return SkillType.NINJUTSU;}
-
+    @Override public String getId() { return "water_walk"; }
+    @Override public String getDisplayName() { return "Water Walk"; }
+    @Override public float getChakraCost() { return JutsuType.SUBSTITUTION.getResourceCost(); }
+    @Override public float getCooldown() { return JutsuType.SUBSTITUTION.getCooldown(); }
+    @Override public SkillType getType() { return SkillType.NINJUTSU; }
 
     @Override
     public void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world) {
-        if (playerRef == null || !playerEntityRef.isValid()) return;
+        if (playerRef == null || !playerEntityRef.isValid() || world == null) return;
 
-        TransformComponent transformComp = store.getComponent(playerEntityRef, TransformComponent.getComponentType());
-        if (transformComp == null) return;
+        ComponentType<EntityStore, WaterWalk> waterWalkType = Main.get().getWaterWalkComponentType();
+        if (waterWalkType == null) return;
 
-        Vector3d pos = transformComp.getPosition();
+        world.execute(() -> {
+            if (!playerEntityRef.isValid()) return;
 
-        int blockX = (int) Math.floor(pos.x);
-        int blockY = (int) Math.floor(pos.y);
-        int blockZ = (int) Math.floor(pos.z);
-
-        BlockType currentBlock = world.getBlockType(blockX, blockY, blockZ);
-        BlockType blockBelow = world.getBlockType(blockX, blockY - 1, blockZ);
-
-        boolean isStandingOnWater = isWater(currentBlock) || isWater(blockBelow);
-
-        if (!isStandingOnWater) return;
-
-        double surfaceY = Math.floor(pos.y) + 0.95;
-
-        if (pos.y < surfaceY) {
-            Vector3d newPos = new Vector3d(pos.x, surfaceY, pos.z);
-            transformComp.setPosition(newPos);
-        }
-    }
-
-    private boolean isWater(BlockType blockType) {
-        if (blockType == null) return false;
-        String id = blockType.getId().toLowerCase();
-        return id.contains("water") || id.contains("fluid") || id.contains("ocean") || id.contains("river");
+            if (store.getComponent(playerEntityRef, waterWalkType) != null) {
+                store.removeComponent(playerEntityRef, waterWalkType);
+            } else {
+                store.addComponent(playerEntityRef, waterWalkType, new WaterWalk());
+            }
+        });
     }
 }

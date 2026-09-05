@@ -3,6 +3,7 @@ package com.cachorrovascaino.plugin.Ui.Page;
 import com.cachorrovascaino.plugin.Abstractions.SkillType;
 import com.cachorrovascaino.plugin.Data.Clan.ClanType;
 import com.cachorrovascaino.plugin.Data.Jutsus.JutsuType;
+import com.cachorrovascaino.plugin.Data.MangekyouType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Manager.PlayerDataManager;
@@ -45,6 +46,12 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
     public static final String GENJUTSU_CARD_TEMPLATE = "Shinobi/Components/skills/GenjutsuSkill.ui";
     public static final String ClAN_NINJUTSU_TEMPLATE = "Shinobi/Components/skills/Clan/ClanNinjutsus.ui";
 
+    private static final Random RANDOM = new Random();
+
+    private static final List<MangekyouType> MANGEKYOU_POOL = List.of(
+            MangekyouType.OBITO,
+            MangekyouType.SHISUI
+    );
 
     private static final Map<String, String> SKILLS_UI_MAP = Map.of(
             "Ninjutsu", "Shinobi/Components/skills/NinjutsuSkill.ui",
@@ -83,13 +90,13 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         if (data == null) { data = dataManager.loadPlayer(uuid, username); }
         if (data == null) { data = new PlayerData(username, uuid.toString()); }
 
-        if (!Objects.equals(currentTab, "Clan")) {buildSlotsSkill(data, cmd);}
+        if (!Objects.equals(currentTab, "Clan")) { buildSlotsSkill(data, cmd); }
 
         buildButtons(evt);
 
-        if ("Ninjutsu".equalsIgnoreCase(currentTab)) {buildComponentsNinjutsu(evt, cmd, data);}
-        if ("Taijutsu".equalsIgnoreCase(currentTab)) {buildComponentsTaijutsu(evt, cmd, data);}
-        if ("Genjutsu".equals(currentTab)) {buildComponentsGenjutsu(evt, cmd, data);}
+        if ("Ninjutsu".equalsIgnoreCase(currentTab)) { buildComponentsNinjutsu(evt, cmd, data); }
+        if ("Taijutsu".equalsIgnoreCase(currentTab)) { buildComponentsTaijutsu(evt, cmd, data); }
+        if ("Genjutsu".equals(currentTab)) { buildComponentsGenjutsu(evt, cmd, data); }
         if ("Clan".equalsIgnoreCase(currentTab)) {
             buildComponentsClan(evt, cmd, data);
             buildSlotSkillClan(data, cmd);
@@ -184,17 +191,29 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
             }
         } else {
             ClanType playerClan = ClanType.fromName(data.getClan());
-            List<ClanType.ClanSkill> clanSkills = playerClan.getSkills();
+            List<ClanType.ClanSkill> allClanSkills = playerClan.getSkills();
 
-            if (clanSkills != null && !clanSkills.isEmpty()) {
-                int totalPages = Math.max(1, (int) Math.ceil((double) clanSkills.size() / ITEMS_PER_PAGE));
+            if (allClanSkills != null && !allClanSkills.isEmpty()) {
+
+                MangekyouType playerMangekyou = MangekyouType.fromName(data.getMangekyouType());
+
+                List<ClanType.ClanSkill> filteredSkills = allClanSkills.stream().filter(skill -> {
+                    String id = skill.getId().toLowerCase();
+
+                    if (id.startsWith("kamui_")) { return playerMangekyou == MangekyouType.OBITO; }
+                    if (id.startsWith("kotoamatsukami_")) { return playerMangekyou == MangekyouType.SHISUI; }
+
+                    return true;
+                }).toList();
+
+                int totalPages = Math.max(1, (int) Math.ceil((double) filteredSkills.size() / ITEMS_PER_PAGE));
                 validateCurrentPage(totalPages);
 
                 cmd.set("#LabelPagination.Text", (currentPage + 1) + "/" + totalPages);
 
                 int start = currentPage * ITEMS_PER_PAGE;
-                int end = Math.min(start + ITEMS_PER_PAGE, clanSkills.size());
-                List<ClanType.ClanSkill> pageSkills = clanSkills.subList(start, end);
+                int end = Math.min(start + ITEMS_PER_PAGE, filteredSkills.size());
+                List<ClanType.ClanSkill> pageSkills = filteredSkills.subList(start, end);
 
                 int renderIndex = 0;
                 for (ClanType.ClanSkill skill : pageSkills) {
@@ -214,8 +233,8 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
                     cmd.set(skillPath + " #LabelJutsuReq1.Text", "Ninj: " + skill.getRequiredNinjutsu());
                     cmd.set(skillPath + " #LabelJutsuReq2.Text", "Taij: " + skill.getRequiredTaijutsu());
                     cmd.set(skillPath + " #LabelJutsuReq3.Text", "Genj: " + skill.getRequiredGenjutsu());
-                    cmd.set(skillPath + " #LabelJutsuReq4.Text", "Skill: " + skill.getRequiredSkillId());
-                    cmd.set(skillPath + " #LabelJutsuReq5.Text", "Chakra Max: " + skill.getRequiredMaxChakra());
+                    cmd.set(skillPath + " #LabelJutsuReq4.Text", "Skill: " + (skill.getRequiredSkillId() != null ? skill.getRequiredSkillId() : "Nenhuma"));
+                    cmd.set(skillPath + " #LabelJutsuReq5.Text", "Chakra Max: " + (int) skill.getRequiredMaxChakra());
 
                     String actionText = "LEARN";
                     if (!isUnlocked) {
@@ -367,7 +386,7 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         }
     }
 
-    public void buildComponentsGenjutsu(@Nonnull UIEventBuilder evt, @Nonnull UICommandBuilder cmd, @Nonnull PlayerData data){
+    public void buildComponentsGenjutsu(@Nonnull UIEventBuilder evt, @Nonnull UICommandBuilder cmd, @Nonnull PlayerData data) {
         cmd.clear("#SkillsContent");
 
         List<JutsuType> genjutsus = Arrays.stream(JutsuType.values())
@@ -512,6 +531,14 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
                     playerData.setMaxChakra(100.0f + chosenClan.getBonusChakra());
                     playerData.setChakraControl(chosenClan.getChakraControlMultiplier());
 
+                    if (chosenClan == ClanType.UCHIHA) {
+                        MangekyouType currentMangekyou = MangekyouType.fromName(playerData.getMangekyouType());
+                        if (currentMangekyou == null) {
+                            MangekyouType drawnMangekyou = MANGEKYOU_POOL.get(RANDOM.nextInt(MANGEKYOU_POOL.size()));
+                            playerData.setMangekyouType(drawnMangekyou.name());
+                        }
+                    }
+
                     dataManager.savePlayer(uuid);
                     this.currentPage = 0;
                 }
@@ -572,16 +599,11 @@ public class SkillsPage extends InteractiveCustomUIPage<SkillsPage.UIEventData> 
         toggleHotbarEquip(data, hotbar, jutsuId, 4);
     }
 
-    /**
-     * Verifica se o jogador atende a todos os requisitos individuais de atributos e pontos para aprender o Jutsu.
-     */
     private boolean canUnlockJutsu(PlayerData data, JutsuType jutsu) {
         return data.getTaijutsu() >= jutsu.getReqTaijutsu()
                 && data.getGenjutsu() >= jutsu.getReqGenjutsu()
                 && data.getNinjutsu() >= jutsu.getReqNinjutsu()
-                //&& data.getHealth() >= jutsu.getReqHealth()
                 && data.getSpeed() >= jutsu.getReqSpeed()
-                //&& data.getStamina() >= jutsu.getReqStamina()
                 && data.getAvailablePoints() >= jutsu.getRequiredPoints();
     }
 
