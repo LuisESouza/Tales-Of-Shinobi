@@ -14,7 +14,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,18 +26,11 @@ public class SubstitutionJutsu implements Jutsu {
     private static final float COST_PER_LEVEL = 4.0f;
     private static final double TELEPORT_DISTANCE = 8.0;
 
-    @Override public String getId() {
-        return "substitution_jutsu";
-    }
-    @Override public String getDisplayName() {
-        return "Kawarimi no Jutsu";
-    }
-    @Override public float getChakraCost() {
-        return JutsuType.SUBSTITUTION.getResourceCost();
-    }
-    @Override public float getCooldown() {return JutsuType.SUBSTITUTION.getCooldown();}
-    @Override public SkillType getType() {return SkillType.NINJUTSU;}
-
+    @Override public String getId() {return "substitution_jutsu";}
+    @Override public String getDisplayName() {return "Kawarimi no Jutsu";}
+    @Override public float getChakraCost() {return JutsuType.SUBSTITUTION.getResourceCost();}
+    @Override public float getCooldown() { return JutsuType.SUBSTITUTION.getCooldown(); }
+    @Override public SkillType getType() { return SkillType.NINJUTSU; }
 
     @Override
     public float getChakraCost(PlayerRef playerRef) {
@@ -70,12 +63,17 @@ public class SubstitutionJutsu implements Jutsu {
         double targetX = currentTransform.getPosition().x - TELEPORT_DISTANCE;
         double targetZ = currentTransform.getPosition().z - TELEPORT_DISTANCE;
 
-        long chunkIndex = ChunkUtil.indexChunkFromBlock((int) targetX, (int) targetZ);
-        WorldChunk targetChunk = world.getChunkIfLoaded(chunkIndex);
+        double finalY = currentTransform.getPosition().y;
 
-        double finalY = (targetChunk != null)
-                ? (double) targetChunk.getHeight((int) targetX & 31, (int) targetZ & 31) + 1.5
-                : currentTransform.getPosition().y;
+        ChunkStore chunkStore = world.getChunkStore();
+        if (chunkStore != null) {
+            long chunkIndex = ChunkUtil.indexChunkFromBlock((int) targetX, (int) targetZ);
+            Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(chunkIndex);
+
+            if (chunkRef != null && chunkRef.isValid()) {
+                finalY = currentTransform.getPosition().y;
+            }
+        }
 
         Transform targetTransform = new Transform(
                 targetX,

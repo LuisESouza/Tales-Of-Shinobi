@@ -1,4 +1,4 @@
-package com.cachorrovascaino.plugin.Features.Clan.Abilities;
+package com.cachorrovascaino.plugin.Features.Clan.Abilities.Uchiha;
 
 import com.cachorrovascaino.plugin.Abstractions.ClanJutsu;
 import com.cachorrovascaino.plugin.Data.Components.MangekyouSharingan;
@@ -78,7 +78,7 @@ public class KotoamatsukamiOpticalTetherJutsu implements ClanJutsu {
 
             taskHolder[0] = SCHEDULER.scheduleAtFixedRate(() -> {
                 world.execute(() -> {
-                    if (!playerEntityRef.isValid() || !finalTarget.isValid() || ticks[0] >= 30) { // 6 segundos de duração
+                    if (!playerEntityRef.isValid() || !finalTarget.isValid() || ticks[0] >= 30) {
                         if (taskHolder[0] != null) taskHolder[0].cancel(false);
                         return;
                     }

@@ -1,0 +1,16 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Crater",
+      "StartDelay": 0.1,
+      "PositionOffset": {
+        "Y": 0.1
+      }
+    },
+    {
+      "SpawnerId": "Impact_Mace_Bash_Distortion"
+    }
+  ],
+  "BoundingRadius": 10,
+  "IsImportant": true
+}

@@ -1,4 +1,4 @@
-package com.cachorrovascaino.plugin.Features.Clan.Abilities;
+package com.cachorrovascaino.plugin.Features.Clan.Abilities.Uchiha;
 
 import com.cachorrovascaino.plugin.Abstractions.ClanJutsu;
 import com.cachorrovascaino.plugin.Data.Components.MangekyouSharingan;

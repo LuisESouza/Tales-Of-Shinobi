@@ -7,31 +7,20 @@ public enum ClanType {
 
     UCHIHA("Uchiha", "Masters of Fire Release with excellent Chakra control and evolving Dōjutsu.", 0.0f, 25.0f, 1.2f, List.of(
             new ClanSkill("sharingan_1", "Sharingan (1 Tomoe)", "Enhances perception and basic evasion.", 20.0f, 140.0f, 15, 25, 10, null, false),
-
             new ClanSkill("sharingan_2", "Sharingan (2 Tomoes)", "Allows predicting movements and copying simple techniques.", 20.0f, 200.0f, 30, 45, 20, "sharingan_1", false),
-
             new ClanSkill("sharingan_3", "Sharingan (3 Tomoes)", "Maximum perception and complete mastery of the base dōjutsu.", 20.0f, 320.0f, 40, 55, 30, "sharingan_2", false),
-
             new ClanSkill("mangekyou", "Mangekyō Sharingan", "Awakens the supreme ocular powers of the clan.", 20.0f, 420.0f, 60, 75, 50, "sharingan_3", true),
-
             new ClanSkill("susanoo", "Susanoo", "Summons a humanoid armor of supreme chakra.", 10.0f, 0.0f, 0, 0, 0, "mangekyou", true),
-
             new ClanSkill("kamui_behind_teleport", "Kamui: Temporal Ambush", "Teleports behind the targeted enemy through space-time.", 100.0f, 450.0f, 0, 80, 0, "mangekyou", true),
-
             new ClanSkill("kamui_intangibility", "Kamui: Intangibility", "Renders the body intangible, allowing attacks and physical matter to pass through.", 200.0f, 1000.0f, 0, 90, 0, "mangekyou", true),
-
             new ClanSkill("kotoamatsukami_tether", "Kotoamatsukami: Optical Tether", "Binds target with invisible chakra tether that forces proximity.", 120.0f, 500.0f, 0, 70, 90, "mangekyou", true),
-
             new ClanSkill("kotoamatsukami_blindspot", "Kotoamatsukami: Sensory Blindspot", "Alters target perception, making you completely invisible to them.", 130.0f, 550.0f, 0, 70, 95, "mangekyou", true)
     )),
 
     HYUGA("Hyuga", "Specialists in Taijutsu and pressure point control.", 20.0f, 10.0f, 1.1f, List.of(
-
             new ClanSkill("byakugan", "Byakugan", "Provides 360-degree vision and perception of the chakra pathway system.", 15.0f, 50.0f, 0, 0, 0, null, false),
-
-            new ClanSkill("juken", "Jūken", "Direct strikes to tenketsu points to block the target's chakra.", 20.0f, 60.0f, 45, 15, 15, "byakugan", false),
-
-            new ClanSkill("kaiten", "Eight Trigrams Palms Revolving Heaven", "Absolute rotating defense that expels chakra from all pores.", 40.0f, 100.0f, 60, 30, 20, "byakugan", false)
+            new ClanSkill("kaiten", "Eight Trigrams", "Absolute rotating defense that expels chakra from all pores.", 40.0f, 100.0f, 60, 30, 20, "byakugan", true),
+            new ClanSkill("hakke_kusho", "Eight Trigrams: Test", "Absolute rotating defense that expels chakra from all pores.", 40.0f, 100.0f, 60, 30, 20, "byakugan", true)
     )),
 
     UZUMAKI("Uzumaki", "Possess formidable vitality and immense Chakra reserves.", 50.0f, 50.0f, 1.0f, List.of(

@@ -1,0 +1,23 @@
+{
+  "Model": "Items/Projectiles/Tornado.blockymodel",
+  "Texture": "Items/Projectiles/Tornado_Texture.png",
+  "HitBox": {
+    "Max": {
+      "X": 1.2,
+      "Y": 2,
+      "Z": 1.2
+    },
+    "Min": {
+      "X": -1.2,
+      "Y": 0,
+      "Z": -1.2
+    }
+  },
+  "MinScale": 1,
+  "MaxScale": 1,
+  "Particles": [
+    {
+      "SystemId": "Ability_Windstrikes"
+    }
+  ]
+}

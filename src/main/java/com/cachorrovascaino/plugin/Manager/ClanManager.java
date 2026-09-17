@@ -2,13 +2,14 @@ package com.cachorrovascaino.plugin.Manager;
 
 import com.cachorrovascaino.plugin.Abstractions.ClanJutsu;
 import com.cachorrovascaino.plugin.Data.Clan.ClanType;
-import com.cachorrovascaino.plugin.Data.Components.Byakugan;
-import com.cachorrovascaino.plugin.Data.Components.Sharingan;
+import com.cachorrovascaino.plugin.Data.MangekyouType;
 import com.cachorrovascaino.plugin.Data.PlayerData;
-import com.cachorrovascaino.plugin.Features.Clan.Abilities.KamuiBehindTeleportJutsu;
-import com.cachorrovascaino.plugin.Features.Clan.Abilities.KamuiIntangibilityJutsu;
-import com.cachorrovascaino.plugin.Features.Clan.Abilities.KotoamatsukamiOpticalTetherJutsu;
-import com.cachorrovascaino.plugin.Features.Clan.Abilities.KotoamatsukamiSensoryBlindspotJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.Hyuga.HakkeKushoJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.Hyuga.KaitenJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.Uchiha.KamuiBehindTeleportJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.Uchiha.KamuiIntangibilityJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.Uchiha.KotoamatsukamiOpticalTetherJutsu;
+import com.cachorrovascaino.plugin.Features.Clan.Abilities.Uchiha.KotoamatsukamiSensoryBlindspotJutsu;
 import com.cachorrovascaino.plugin.Features.Clan.ByakuganJutsu;
 import com.cachorrovascaino.plugin.Features.Clan.MangekyouJutsu;
 import com.cachorrovascaino.plugin.Features.Clan.SharinganJutsu;
@@ -23,9 +24,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ClanManager {
 
@@ -41,6 +40,12 @@ public class ClanManager {
             "byakugan", "Byakugan_HD"
     );
 
+    private static final Random RANDOM = new Random();
+    private static final List<MangekyouType> MANGEKYOU_POOL = List.of(
+            MangekyouType.OBITO,
+            MangekyouType.SHISUI
+    );
+
     private static final Map<String, String> CLAN_SLOT_COMBOS = Map.of(
             "R-L-L", "slot_1",
             "R-R-L", "slot_2",
@@ -53,9 +58,8 @@ public class ClanManager {
     }
 
     private void registerClanJutsus() {
-        registerClanJutsu(ByakuganJutsu.INSTANCE);
+        // Uchiha
         registerClanJutsu(SharinganJutsu.INSTANCE);
-
         registerClanJutsu(MangekyouJutsu.INSTANCE);
         // OBITO
         registerClanJutsu(KamuiIntangibilityJutsu.INSTANCE);
@@ -63,35 +67,76 @@ public class ClanManager {
         // SHISUI
         registerClanJutsu(KotoamatsukamiOpticalTetherJutsu.INSTANCE);
         registerClanJutsu(KotoamatsukamiSensoryBlindspotJutsu.INSTANCE);
+
+        //Hyuga
+        registerClanJutsu(ByakuganJutsu.INSTANCE);
+        registerClanJutsu(KaitenJutsu.INSTANCE);
+        registerClanJutsu(HakkeKushoJutsu.INSTANCE);
     }
 
     private void registerClanJutsu(ClanJutsu jutsu) { clanJutsuRegistry.put(jutsu.getId(), jutsu); }
 
-    public boolean setPlayerClan(PlayerRef playerRef, ClanType newClan) {
-        if (playerRef == null || newClan == null) return false;
+    public void setPlayerClan(PlayerRef playerRef, ClanType newClan) {
+        if (playerRef == null || newClan == null) return;
 
         PlayerData data = Main.getDataManager().getPlayerData(playerRef.getUuid());
-        if (data == null) return false;
+        if (data == null) return;
 
-        data.setClan(newClan.getDisplayName());
+        ClanType oldClan = ClanType.fromName(data.getClan());
+        if (oldClan != ClanType.NONE) {
+            removeClanModifiers(data, oldClan);
+        }
+
+        if (data.getUnlockedClanJutsu() != null) { data.getUnlockedClanJutsu().clear(); }
+        if (data.getEquippedClanHotbar() != null) { data.getEquippedClanHotbar().clear(); }
+
+        data.setActiveDojutsu(PlayerData.DojutsuState.NONE);
+        data.setEyeDojutsuType(null);
+        data.setEyeStage(0);
+
+        if (data.getOriginalEyesColor() != null && !data.getOriginalEyesColor().isEmpty()) {
+            data.setEyesColor(data.getOriginalEyesColor());
+        }
+        if (data.getOriginalEyesId() != null && !data.getOriginalEyesId().isEmpty()) {
+            data.setEyesId(data.getOriginalEyesId());
+        }
+
+        if (newClan == ClanType.UCHIHA) {
+            if (data.getMangekyouType() == null || data.getMangekyouType().isEmpty() || data.getMangekyouType().equalsIgnoreCase("NONE")) {
+                MangekyouType drawn = MANGEKYOU_POOL.get(RANDOM.nextInt(MANGEKYOU_POOL.size()));
+                data.setMangekyouType(drawn.name());
+            }
+        } else {
+            data.setMangekyouType(null);
+        }
+
+        data.setClan(newClan.name());
         applyClanModifiers(data, newClan);
 
-        Main.getJutsuManager().updateChakraHud(playerRef);
+        // 7. Salva no disco/cache
         Main.getDataManager().savePlayer(playerRef.getUuid());
-        return true;
+    }
+
+    private void removeClanModifiers(PlayerData data, ClanType oldClan) {
+        float currentMaxHp = Math.max(100.0f, data.getMaxHealth() - oldClan.getBonusHealth());
+        data.setMaxHealth(currentMaxHp);
+        data.setCurrentHealth(Math.min(data.getCurrentHealth(), data.getMaxHealth()));
+
+        float currentMaxChakra = Math.max(100.0f, data.getMaxChakra() - oldClan.getBonusChakra());
+        data.setMaxChakra(currentMaxChakra);
+        data.setCurrentChakra(Math.min(data.getCurrentChakra(), data.getMaxChakra()));
     }
 
     private void applyClanModifiers(PlayerData data, ClanType clan) {
-        float baseHealth = 100.0f;
-        float baseChakra = 100.0f;
+        if (clan == ClanType.NONE) return;
 
-        data.setMaxHealth(baseHealth + clan.getBonusHealth());
+        data.setMaxHealth(data.getMaxHealth() + clan.getBonusHealth());
         data.setCurrentHealth(Math.min(data.getCurrentHealth(), data.getMaxHealth()));
 
-        data.setMaxChakra(baseChakra + clan.getBonusChakra());
+        data.setMaxChakra(data.getMaxChakra() + clan.getBonusChakra());
         data.setCurrentChakra(Math.min(data.getCurrentChakra(), data.getMaxChakra()));
 
-        data.setChakraControl(clan.getChakraControlMultiplier());
+        data.setChakraControl(data.getChakraControl() + clan.getChakraControlMultiplier());
     }
 
     // ==========================================================================================

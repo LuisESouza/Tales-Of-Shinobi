@@ -18,36 +18,39 @@ public class TargetUtils {
     /**
      * Coleta TODAS as entidades (Players + Mobs) dentro de um raio a partir de um centro.
      */
-    @SuppressWarnings("unchecked")
     public static List<Ref<EntityStore>> getEntitiesInRadius(Vector3d center, double radius, Store<EntityStore> store) {
         Set<Ref<EntityStore>> uniqueEntities = new HashSet<>();
 
         SpatialResource<Ref<EntityStore>, EntityStore> entitySpatial = store.getResource(EntityModule.get().getEntitySpatialResourceType());
         if (entitySpatial != null) {
-            List<Ref<EntityStore>> mobList = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-            entitySpatial.getSpatialStructure().collect(center, radius, mobList);
-            uniqueEntities.addAll(mobList);
+            List<Ref<EntityStore>> temp = new ArrayList<>();
+            entitySpatial.getSpatialStructure().collect(center, radius, temp);
+            uniqueEntities.addAll(temp);
         }
 
         SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial = store.getResource(EntityModule.get().getPlayerSpatialResourceType());
         if (playerSpatial != null) {
-            List<Ref<EntityStore>> playerList = (List<Ref<EntityStore>>) (List<?>) SpatialResource.getThreadLocalReferenceList();
-            playerSpatial.getSpatialStructure().collect(center, radius, playerList);
-            uniqueEntities.addAll(playerList);
+            List<Ref<EntityStore>> temp = new ArrayList<>();
+            playerSpatial.getSpatialStructure().collect(center, radius, temp);
+            uniqueEntities.addAll(temp);
         }
 
         return new ArrayList<>(uniqueEntities);
     }
 
     /**
-     * Encontra a entidade (Player ou Mob) exatamente na mira/mira direcional (Raycast com cone de precisão).
-     *
-     * @param casterRef EntityRef de quem está lançando o jutsu
-     * @param store Store de componentes
-     * @param maxDistance Distância máxima do golpe/jutsu (ex: 4.0 para Taijutsu, 20.0 para Kamui)
-     * @param toleranceDegrees Ângulo de tolerância para acertar a mira (ex: 20.0 graus)
-     * @return Ref<EntityStore> da vítima ou null se não encontrar nada
+     * Coleta APENAS Players dentro de um raio a partir de um centro.
      */
+    public static List<Ref<EntityStore>> getPlayersInRadius(Vector3d center, double radius, Store<EntityStore> store) {
+        SpatialResource<Ref<EntityStore>, EntityStore> playerSpatial = store.getResource(EntityModule.get().getPlayerSpatialResourceType());
+        if (playerSpatial != null) {
+            List<Ref<EntityStore>> playerList = new ArrayList<>();
+            playerSpatial.getSpatialStructure().collect(center, radius, playerList);
+            return playerList;
+        }
+        return Collections.emptyList();
+    }
+
     public static Ref<EntityStore> getTargetInLineOfSight(
             Ref<EntityStore> casterRef,
             Store<EntityStore> store,

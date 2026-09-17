@@ -11,10 +11,12 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.NameplateUpdate;
+import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.tracker.EntityTrackerSystems;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
@@ -49,6 +51,8 @@ public class ByakuganJutsu implements ClanJutsu {
     @Override
     public void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world) {
         if (playerRef == null || !playerEntityRef.isValid() || world == null) return;
+
+        SoundUtil.playSoundEvent2dToPlayer(playerRef, "SFX_Byakugan", SoundCategory.SFX);
 
         PlayerData playerData = Main.getDataManager().getPlayerData(playerRef.getUuid());
         if (playerData == null) return;

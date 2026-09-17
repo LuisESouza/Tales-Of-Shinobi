@@ -1,0 +1,17 @@
+{
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/sharingan_sound.ogg"
+      ],
+      "RandomSettings": {
+        "MinPitch": 0,
+        "MaxPitch": 0,
+        "MinVolume": -15
+      }
+    }
+  ],
+  "Volume": -15,
+  "MaxDistance": 10,
+  "StartAttenuationDistance": 2
+}

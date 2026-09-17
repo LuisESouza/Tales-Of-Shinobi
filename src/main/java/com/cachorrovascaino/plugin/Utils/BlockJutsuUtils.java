@@ -2,12 +2,15 @@ package com.cachorrovascaino.plugin.Utils;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.physics.util.PhysicsMath;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
@@ -21,6 +24,18 @@ import java.util.concurrent.TimeUnit;
 public class BlockJutsuUtils {
 
     public static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+
+    private static class OriginalBlockData {
+        final int blockId;
+        final int rotation;
+        final int filler;
+
+        OriginalBlockData(int blockId, int rotation, int filler) {
+            this.blockId = blockId;
+            this.rotation = rotation;
+            this.filler = filler;
+        }
+    }
 
     /**
      * Pega o vetor para onde o jogador está olhando no plano XZ (horizontal puro).
@@ -52,7 +67,6 @@ public class BlockJutsuUtils {
     public static Vector3d getRightVector(Vector3d lookVector) {
         return new Vector3d(lookVector).cross(0.0, 1.0, 0.0).normalize();
     }
-
 
     /**
      * Algoritmo de Bresenham 2D: Gera uma linha contínua de blocos entre dois pontos (sem buracos).
@@ -108,7 +122,6 @@ public class BlockJutsuUtils {
         return circle;
     }
 
-
     /**
      * Constrói uma estrutura animada por camadas usando um ÚNICO bloco fixo (ex: "Rock_Stone", "Wood_Log_Oak").
      */
@@ -119,7 +132,8 @@ public class BlockJutsuUtils {
             long delayBetweenStepsMs,
             long wallDurationMs
     ) {
-        Map<Vector3i, String> originalBlocks = new ConcurrentHashMap<>();
+        Map<Vector3i, OriginalBlockData> originalBlocks = new ConcurrentHashMap<>();
+        int newBlockId = BlockType.getAssetMap().getIndex(blockKey);
 
         layersByStep.forEach((step, blockPositions) -> {
             long delay = step * delayBetweenStepsMs;
@@ -127,12 +141,7 @@ public class BlockJutsuUtils {
             SCHEDULER.schedule(() -> {
                 world.execute(() -> {
                     for (Vector3i pos : blockPositions) {
-                        BlockType currentType = world.getBlockType(pos.x, pos.y, pos.z);
-                        String oldKey = (currentType != null) ? currentType.getId() : "Empty";
-
-                        originalBlocks.putIfAbsent(pos, oldKey);
-
-                        world.setBlock(pos.x, pos.y, pos.z, blockKey);
+                        setBlockInstant(world, pos, newBlockId, 0, 0, originalBlocks);
                     }
                 });
             }, delay, TimeUnit.MILLISECONDS);
@@ -143,8 +152,6 @@ public class BlockJutsuUtils {
 
     /**
      * Constrói uma estrutura animada onde CADA COLUNA herda dinamicamente o bloco do chão original.
-     *
-     * @param customBlockPerColumn Mapa com a posição base do chão (Vector3i) -> ID do bloco a ser propagado nessa coluna.
      */
     public static void spawnAnimatedDynamicStructure(
             World world,
@@ -153,7 +160,7 @@ public class BlockJutsuUtils {
             long delayBetweenStepsMs,
             long wallDurationMs
     ) {
-        Map<Vector3i, String> originalBlocks = new ConcurrentHashMap<>();
+        Map<Vector3i, OriginalBlockData> originalBlocks = new ConcurrentHashMap<>();
 
         int groundY = layersByStep.containsKey(0) && !layersByStep.get(0).isEmpty()
                 ? layersByStep.get(0).iterator().next().y
@@ -167,13 +174,9 @@ public class BlockJutsuUtils {
                     for (Vector3i pos : blockPositions) {
                         Vector3i baseGroundPos = new Vector3i(pos.x, groundY, pos.z);
                         String dynamicBlockKey = customBlockPerColumn.getOrDefault(baseGroundPos, "Rock_Stone");
+                        int dynamicBlockId = BlockType.getAssetMap().getIndex(dynamicBlockKey);
 
-                        BlockType currentType = world.getBlockType(pos.x, pos.y, pos.z);
-                        String oldKey = (currentType != null) ? currentType.getId() : "Empty";
-
-                        originalBlocks.putIfAbsent(pos, oldKey);
-
-                        world.setBlock(pos.x, pos.y, pos.z, dynamicBlockKey);
+                        setBlockInstant(world, pos, dynamicBlockId, 0, 0, originalBlocks);
                     }
                 });
             }, delay, TimeUnit.MILLISECONDS);
@@ -183,11 +186,70 @@ public class BlockJutsuUtils {
     }
 
     /**
-     * Método interno auxiliar para agendar a remoção/restauração dos blocos.
+     * Aplica a alteração do bloco de forma síncrona diretamente na BlockSection da ChunkStore.
+     */
+    private static void setBlockInstant(
+            World world,
+            Vector3i pos,
+            int newBlockId,
+            int rotation,
+            int filler,
+            Map<Vector3i, OriginalBlockData> originalBlocks
+    ) {
+        ChunkStore chunkStore = world.getChunkStore();
+        if (chunkStore == null) return;
+
+        int chunkX = ChunkUtil.chunkCoordinate(pos.x);
+        int chunkY = ChunkUtil.chunkCoordinate(pos.y);
+        int chunkZ = ChunkUtil.chunkCoordinate(pos.z);
+
+        Ref<ChunkStore> sectionRef = chunkStore.getChunkSectionReference(chunkX, chunkY, chunkZ);
+
+        if (sectionRef != null && sectionRef.isValid()) {
+            applyBlockToSection(chunkStore, sectionRef, pos, newBlockId, rotation, filler, originalBlocks);
+        } else {
+            chunkStore.getChunkSectionReferenceAsync(chunkX, chunkY, chunkZ).thenAcceptAsync(ref -> {
+                if (ref != null && ref.isValid()) {
+                    applyBlockToSection(chunkStore, ref, pos, newBlockId, rotation, filler, originalBlocks);
+                }
+            }, world);
+        }
+    }
+
+    private static void applyBlockToSection(
+            ChunkStore chunkStore,
+            Ref<ChunkStore> ref,
+            Vector3i pos,
+            int newBlockId,
+            int rotation,
+            int filler,
+            Map<Vector3i, OriginalBlockData> originalBlocks
+    ) {
+        BlockSection blockSection = chunkStore.getStore().getComponent(ref, BlockSection.getComponentType());
+        if (blockSection == null) return;
+
+        int localX = pos.x & ChunkUtil.SIZE_MASK;
+        int localY = pos.y & ChunkUtil.SIZE_MASK;
+        int localZ = pos.z & ChunkUtil.SIZE_MASK;
+        int blockIdx = ChunkUtil.indexBlock(localX, localY, localZ);
+
+        if (originalBlocks != null && !originalBlocks.containsKey(pos)) {
+            int oldBlockId = blockSection.get(blockIdx);
+            int oldRotation = blockSection.getRotationIndex(blockIdx);
+            int oldFiller = blockSection.getFiller(blockIdx);
+
+            originalBlocks.put(pos, new OriginalBlockData(oldBlockId, oldRotation, oldFiller));
+        }
+
+        blockSection.set(blockIdx, newBlockId, rotation, filler);
+    }
+
+    /**
+     * Agenda a restauração e remoção dos blocos modificados.
      */
     private static void scheduleCleanup(
             World world,
-            Map<Vector3i, String> originalBlocks,
+            Map<Vector3i, OriginalBlockData> originalBlocks,
             int totalSteps,
             long delayBetweenStepsMs,
             long wallDurationMs
@@ -196,14 +258,48 @@ public class BlockJutsuUtils {
 
         SCHEDULER.schedule(() -> {
             world.execute(() -> {
-                originalBlocks.forEach((pos, oldKey) -> {
-                    if (oldKey == null || oldKey.equalsIgnoreCase("Empty")) {
-                        world.setBlock(pos.x, pos.y, pos.z, "Empty");
-                    } else {
-                        world.setBlock(pos.x, pos.y, pos.z, oldKey);
-                    }
+                originalBlocks.forEach((pos, data) -> {
+                    setBlockInstant(world, pos, data.blockId, data.rotation, data.filler, null);
                 });
             });
         }, totalAnimTime + wallDurationMs, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Procura o bloco sólido mais alto em uma coluna (x, z) a partir de startY até (startY - maxSearchDepth).
+     * Utiliza o padrão de consulta de BlockSection direto do ChunkStore.
+     */
+    public static int getHighestBlockYAt(World world, int x, int startY, int z, int maxSearchDepth) {
+        ChunkStore chunkStore = world.getChunkStore();
+        if (chunkStore == null) return startY;
+
+        Store<ChunkStore> store = chunkStore.getStore();
+        if (store == null) return startY;
+
+        for (int y = startY; y >= startY - maxSearchDepth; y--) {
+            int chunkX = ChunkUtil.chunkCoordinate(x);
+            int chunkY = ChunkUtil.chunkCoordinate(y);
+            int chunkZ = ChunkUtil.chunkCoordinate(z);
+
+            Ref<ChunkStore> sectionRef = chunkStore.getChunkSectionReference(chunkX, chunkY, chunkZ);
+
+            if (sectionRef != null && sectionRef.isValid()) {
+                BlockSection blockSection = store.getComponent(sectionRef, BlockSection.getComponentType());
+                if (blockSection != null) {
+                    int localX = x & ChunkUtil.SIZE_MASK;
+                    int localY = y & ChunkUtil.SIZE_MASK;
+                    int localZ = z & ChunkUtil.SIZE_MASK;
+                    int blockIdx = ChunkUtil.indexBlock(localX, localY, localZ);
+
+                    int blockId = blockSection.get(blockIdx);
+
+                    if (blockId != 0) {
+                        return y;
+                    }
+                }
+            }
+        }
+
+        return startY;
     }
 }

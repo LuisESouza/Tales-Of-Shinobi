@@ -1,7 +1,5 @@
 {
-  "_BaseAssetPath": "Item/Unarmed/Interactions/Empty.json",
   "Interactions": {
-    "Wielding": "Double_Jump",
     "Primary": {
       "Settings": {
         "Adventure": {
@@ -91,7 +89,34 @@
           }
         }
       ]
+    },
+    "Ability3": {
+      "Settings": {
+        "Adventure": {
+          "Cooldown": {
+            "Id": "BlockInteraction",
+            "Cooldown": 0.35
+          }
+        },
+        "Creative": {
+          "Cooldown": {
+            "Id": "BlockInteraction_Creative",
+            "Cooldown": 0.35,
+            "ClickBypass": true
+          }
+        }
+      },
+      "Interactions": [
+        {
+          "Type": "Simple",
+          "Next": {
+            "Type": "UseBlock",
+            "Failed": {
+              "Type": "UseEntity"
+            }
+          }
+        }
+      ]
     }
   }
 }
-

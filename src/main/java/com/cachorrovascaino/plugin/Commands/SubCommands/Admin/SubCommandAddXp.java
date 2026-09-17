@@ -24,6 +24,7 @@ public class SubCommandAddXp extends AbstractPlayerCommand {
     public SubCommandAddXp() {
         super("addxp", "Adds XP to the player.");
         this.amountArg = this.withRequiredArg("amount", "XP amount to add", ArgTypes.INTEGER);
+        this.requireNoPermission();
     }
 
     @Override

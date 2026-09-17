@@ -7,14 +7,17 @@ import com.cachorrovascaino.plugin.Data.PlayerData;
 import com.cachorrovascaino.plugin.Features.Genjutsu.KasumiJushi;
 import com.cachorrovascaino.plugin.Features.Genjutsu.Kokuangyo;
 import com.cachorrovascaino.plugin.Features.Genjutsu.NehanShojo;
-import com.cachorrovascaino.plugin.Features.Ninjutsu.DotonWallJutsu;
-import com.cachorrovascaino.plugin.Features.Ninjutsu.ShadowCloneJutsu;
-import com.cachorrovascaino.plugin.Features.Ninjutsu.SubstitutionJutsu;
-import com.cachorrovascaino.plugin.Features.Ninjutsu.WaterWalkJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.*;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.earth.DotonWallJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.FireBallJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.FireJetJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.FireRainJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.fire.MeteoroJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.heal.HealJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.water.SuitonGeyserFieldJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.water.SuitonWaterJetJutsu;
 import com.cachorrovascaino.plugin.Features.Ninjutsu.water.WaterBallJutsu;
+import com.cachorrovascaino.plugin.Features.Ninjutsu.wind.WindTornadoJutsu;
 import com.cachorrovascaino.plugin.Features.Taijutsu.DynamicEntry;
 import com.cachorrovascaino.plugin.Features.Taijutsu.LeafHurricane;
 import com.cachorrovascaino.plugin.Features.Taijutsu.LionCombo;
@@ -68,15 +71,27 @@ public class JutsuManager {
     }
 
     private void registerJutsus() {
-        // Ninjutsus
-        registerJutsu(ShadowCloneJutsu.INSTANCE);
-        registerJutsu(FireBallJutsu.INSTANCE);
+        // Ninjutsus - OTHERS
         registerJutsu(SubstitutionJutsu.INSTANCE);
-        registerJutsu(WaterBallJutsu.INSTANCE);
-        registerJutsu(MeteoroJutsu.INSTANCE);
-        registerJutsu(DotonWallJutsu.INSTANCE);
-        registerJutsu(HealJutsu.INSTANCE);
+        registerJutsu(ShadowCloneJutsu.INSTANCE);
+        registerJutsu(HiraishinJutsu.INSTANCE);
         registerJutsu(WaterWalkJutsu.INSTANCE);
+        registerJutsu(HealJutsu.INSTANCE);
+        // Ninjutsus - FIRE
+        registerJutsu(FireBallJutsu.INSTANCE);
+        registerJutsu(FireRainJutsu.INSTANCE);
+        registerJutsu(FireJetJutsu.INSTANCE);
+        registerJutsu(MeteoroJutsu.INSTANCE);
+        //Ninjutsu - EARTH
+        registerJutsu(DotonWallJutsu.INSTANCE);
+        //Ninjutsu - WIND
+        registerJutsu(WindTornadoJutsu.INSTANCE);
+        //Ninjutsu - WATER
+        registerJutsu(WaterBallJutsu.INSTANCE);
+        registerJutsu(SuitonWaterJetJutsu.INSTANCE);
+        registerJutsu(SuitonGeyserFieldJutsu.INSTANCE);
+
+
 
         // Taijutsus
         registerJutsu(LeafHurricane.INSTANCE);

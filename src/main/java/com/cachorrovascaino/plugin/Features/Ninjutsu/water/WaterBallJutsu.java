@@ -8,7 +8,9 @@ import com.cachorrovascaino.plugin.Main;
 import com.cachorrovascaino.plugin.Utils.ProjectileJutsuUtils;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
@@ -51,6 +53,8 @@ public class WaterBallJutsu implements Jutsu {
     @Override
     public void execute(PlayerRef playerRef, Ref<EntityStore> playerEntityRef, Store<EntityStore> store, World world) {
         float finalDamage = getDamageForPlayer(playerRef);
+
+        SoundUtil.playSoundEvent2dToPlayer(playerRef, "SFX_Jutsu_Sound", SoundCategory.SFX);
 
         ProjectileJutsuUtils.spawnProjectileJutsuEx(
                 playerRef,

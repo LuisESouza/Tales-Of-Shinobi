@@ -1,0 +1,56 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Flamethrower_Main",
+      "PositionOffset": {
+        "Z": 0,
+        "Y": 0.3
+      }
+    },
+    {
+      "SpawnerId": "Flamethrower_Sparks_End",
+      "PositionOffset": {
+        "Z": -2.5,
+        "Y": 0.3
+      }
+    },
+    {
+      "SpawnerId": "Flamethrower_Distortion",
+      "PositionOffset": {
+        "Z": -2.5,
+        "Y": 0.3
+      }
+    },
+    {
+      "SpawnerId": "Flamethrower_Glow_Start",
+      "PositionOffset": {
+        "Z": -2.5,
+        "Y": 0.3
+      }
+    },
+    {
+      "SpawnerId": "Flamethrower_EndSpread",
+      "PositionOffset": {
+        "Z": -2.5,
+        "Y": 0.3
+      }
+    },
+    {
+      "SpawnerId": "Flamethrower_EndSpread_FlyOff",
+      "PositionOffset": {
+        "Y": 0.3,
+        "Z": -2.5
+      }
+    },
+    {
+      "SpawnerId": "Flamethrower_CoreThin",
+      "PositionOffset": {
+        "Z": -2.5,
+        "Y": 0.3
+      }
+    }
+  ],
+  "CullDistance": 100.0,
+  "IsImportant": false,
+  "LifeSpan": 0.5
+}

@@ -13,8 +13,10 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.util.MathUtil;
+import com.hypixel.hytale.protocol.MovementStates;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.modules.collision.WorldUtil;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -26,12 +28,17 @@ import org.joml.Vector3d;
 import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WaterWalkingSystem extends EntityTickingSystem<EntityStore> {
 
     private static final String DEFAULT_WALK_BLOCK = "Barrier";
     private static final float CHAKRA_DRAIN_PER_SECOND = 2.0f;
+    private static final int PLATFORM_RADIUS = 1;
+
+    private final Map<UUID, Vector3d> lastPositions = new ConcurrentHashMap<>();
 
     private final ComponentType<EntityStore, WaterWalk> waterWalkType;
 
@@ -47,29 +54,58 @@ public class WaterWalkingSystem extends EntityTickingSystem<EntityStore> {
         Player player = store.getComponent(ref, Player.getComponentType());
         TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
         UUIDComponent uuidComponent = store.getComponent(ref, UUIDComponent.getComponentType());
+        MovementStatesComponent movementComponent = store.getComponent(ref, MovementStatesComponent.getComponentType());
 
-        if (player == null || transform == null || uuidComponent == null) return;
+        if (player == null || transform == null || uuidComponent == null || dt <= 0.0f) return;
 
-        Vector3d pos = transform.getPosition();
+        UUID playerUuid = uuidComponent.getUuid();
+        Vector3d currentPos = new Vector3d(transform.getPosition());
 
-        double checkY = pos.y - 0.2;
-        int blockX = MathUtil.floor(pos.x);
-        int blockY = MathUtil.floor(checkY);
-        int blockZ = MathUtil.floor(pos.z);
+        Vector3d lastPos = lastPositions.getOrDefault(playerUuid, currentPos);
+        Vector3d moveVector = new Vector3d(currentPos).sub(lastPos);
+        lastPositions.put(playerUuid, currentPos);
+
+        double predictionMultiplier = 1.5;
+
+        if (movementComponent != null) {
+            MovementStates states = movementComponent.getMovementStates();
+            if (states.idle || states.horizontalIdle) {predictionMultiplier = 0.0;}
+            if (states.sprinting) {predictionMultiplier = 3.5;}
+            if (states.running || states.walking) {predictionMultiplier = 2.0;}
+        }
+
+        Vector3d predictedPos = new Vector3d(currentPos).add(
+                moveVector.x * predictionMultiplier,
+                moveVector.y * predictionMultiplier,
+                moveVector.z * predictionMultiplier
+        );
+
+        double checkY = predictedPos.y - 0.2;
+        int centerBlockX = MathUtil.floor(predictedPos.x);
+        int centerBlockY = MathUtil.floor(checkY);
+        int centerBlockZ = MathUtil.floor(predictedPos.z);
 
         World world = store.getExternalData().getWorld();
         ChunkStore chunkStore = world.getChunkStore();
 
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
+        long chunkIndex = ChunkUtil.indexChunkFromBlock(centerBlockX, centerBlockZ);
         Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(chunkIndex);
 
         if (chunkRef == null || !chunkRef.isValid()) return;
 
-        long packed = WorldUtil.getPackedMaterialAndFluidAtPosition(chunkRef, chunkStore.getStore(), pos.x, checkY, pos.z);
+        long packed = WorldUtil.getPackedMaterialAndFluidAtPosition(chunkStore, predictedPos.x, checkY, predictedPos.z);
         int fluidId = MathUtil.unpackRight(packed);
 
+        if (fluidId == 0) {
+            packed = WorldUtil.getPackedMaterialAndFluidAtPosition(chunkStore, currentPos.x, currentPos.y - 0.2, currentPos.z);
+            fluidId = MathUtil.unpackRight(packed);
+
+            centerBlockX = MathUtil.floor(currentPos.x);
+            centerBlockY = MathUtil.floor(currentPos.y - 0.2);
+            centerBlockZ = MathUtil.floor(currentPos.z);
+        }
+
         if (fluidId != 0) {
-            UUID playerUuid = uuidComponent.getUuid();
             PlayerRef playerRef = Universe.get().getPlayer(playerUuid);
 
             if (playerRef != null && playerRef.isValid()) {
@@ -77,6 +113,7 @@ public class WaterWalkingSystem extends EntityTickingSystem<EntityStore> {
 
                 if (!ChakraUtils.consumeChakra(playerRef, cost)) {
                     commandBuffer.removeComponent(ref, this.waterWalkType);
+                    lastPositions.remove(playerUuid);
                     return;
                 }
 
@@ -85,10 +122,17 @@ public class WaterWalkingSystem extends EntityTickingSystem<EntityStore> {
                 }
             }
 
-            Vector3i platformPos = new Vector3i(blockX, blockY, blockZ);
+            for (int dx = -PLATFORM_RADIUS; dx <= PLATFORM_RADIUS; dx++) {
+                for (int dz = -PLATFORM_RADIUS; dz <= PLATFORM_RADIUS; dz++) {
+                    int targetX = centerBlockX + dx;
+                    int targetZ = centerBlockZ + dz;
 
-            if (!WaterWalkUtils.isPlatformActive(platformPos)) {
-                WaterWalkUtils.createTemporaryPlatform(world, blockX, blockY, blockZ, DEFAULT_WALK_BLOCK, 1200);
+                    Vector3i platformPos = new Vector3i(targetX, centerBlockY, targetZ);
+
+                    if (!WaterWalkUtils.isPlatformActive(platformPos)) {
+                        WaterWalkUtils.createTemporaryPlatform(world, targetX, centerBlockY, targetZ, DEFAULT_WALK_BLOCK, 2500);
+                    }
+                }
             }
         }
     }
@@ -100,6 +144,7 @@ public class WaterWalkingSystem extends EntityTickingSystem<EntityStore> {
                 Player.getComponentType(),
                 TransformComponent.getComponentType(),
                 UUIDComponent.getComponentType(),
+                MovementStatesComponent.getComponentType(),
                 this.waterWalkType
         );
     }

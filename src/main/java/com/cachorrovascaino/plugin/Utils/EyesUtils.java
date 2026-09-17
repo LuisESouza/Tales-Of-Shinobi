@@ -23,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class EyesUtils {
 
@@ -250,10 +251,6 @@ public class EyesUtils {
     }
 
     public void captureOriginalEyesIfNeeded(PlayerRef playerRef, PlayerData playerData) {
-        if (playerData.getOriginalEyesId() != null && !playerData.getOriginalEyesId().isEmpty()) {
-            return;
-        }
-
         Ref<EntityStore> ref = playerRef.getReference();
         if (ref == null || !ref.isValid()) return;
         Store<EntityStore> store = ref.getStore();
@@ -267,7 +264,7 @@ public class EyesUtils {
         String[] parts = rawEyes.split("\\.");
         String id = parts[0];
         String color = parts.length > 1 && !parts[1].isEmpty() ? parts[1] : "";
-
+        if(!Objects.equals(id, playerData.getOriginalEyesId()) && !Objects.equals(color, playerData.getOriginalEyesColor()))return;
         playerData.setOriginalEyesId(id);
         playerData.setOriginalEyesColor(color);
 

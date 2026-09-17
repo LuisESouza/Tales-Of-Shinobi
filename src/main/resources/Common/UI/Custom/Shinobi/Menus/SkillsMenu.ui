@@ -117,32 +117,85 @@ Group #SkillsMenuRoot {
             LayoutMode: Top;
             Anchor: (Width: 98, Height: 590, Top: 80, Left: 0);
 
-            TextButton #BtnTabTaijutsu {
-                Text: "TAIJUTSU";
-                Anchor: (Width: 98, Height: 32, Top: 8);
-                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
-                Style: @SecondaryButton;
+            //NavBar (Taijutsu, Ninjutsu, Genjutsu adn Clan)
+            Group #NavBarJutsu{
+                LayoutMode: Top;
+
+                TextButton #BtnTabTaijutsu {
+                    Text: "TAIJUTSU";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
+
+                TextButton #BtnTabNinjutsu {
+                    Text: "NINJUTSU";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
+
+                TextButton #BtnTabGenjutsu {
+                    Text: "GENJUTSU";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
+
+                TextButton #BtnTabClan {
+                    Text: "CLAN";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
             }
 
-            TextButton #BtnTabNinjutsu {
-                Text: "NINJUTSU";
-                Anchor: (Width: 98, Height: 32, Top: 8);
-                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
-                Style: @SecondaryButton;
-            }
+            //NavBarElements - (Fire, Water, Wind, Earth and Rain)
+            Group #NavBarElements{
+                LayoutMode: Top;
+                Anchor: (Top: 15);
 
-            TextButton #BtnTabGenjutsu {
-                Text: "GENJUTSU";
-                Anchor: (Width: 98, Height: 32, Top: 8);
-                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
-                Style: @SecondaryButton;
-            }
+                TextButton #BtnTabFire{
+                    Text: "Fire";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
 
-            TextButton #BtnTabClan {
-                Text: "CLAN";
-                Anchor: (Width: 98, Height: 32, Top: 8);
-                Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
-                Style: @SecondaryButton;
+                TextButton #BtnTabWater{
+                    Text: "Water";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
+
+                TextButton #BtnTabWind{
+                    Text: "Wind";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
+
+                TextButton #BtnTabEarth{
+                    Text: "Earth";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
+
+                TextButton #BtnTabRain{
+                    Text: "Rain";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
+
+                TextButton #BtnTabOthers{
+                    Text: "Others";
+                    Anchor: (Width: 98, Height: 32, Top: 8);
+                    Background: (PatchStyle(TexturePath: "../Assets/BgButton2.png"));
+                    Style: @SecondaryButton;
+                }
             }
         }
     }

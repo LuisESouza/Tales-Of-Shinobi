@@ -7,6 +7,7 @@ import com.cachorrovascaino.plugin.Cosmetics.EyeAttachmentCosmetic;
 import com.cachorrovascaino.plugin.Cosmetics.PlayerModelCosmetic;
 import com.cachorrovascaino.plugin.Data.Components.*;
 import com.cachorrovascaino.plugin.Interactions.JutsuComboInteraction;
+import com.cachorrovascaino.plugin.Interactions.KunaiHitInteraction;
 import com.cachorrovascaino.plugin.Listener.PlayerListener;
 import com.cachorrovascaino.plugin.Manager.ClanManager;
 import com.cachorrovascaino.plugin.Manager.CooldownManager;
@@ -57,6 +58,7 @@ public class Main extends JavaPlugin {
     private ComponentType<EntityStore, Byakugan> byakugan;
     private ComponentType<EntityStore, Sharingan> sharingan;
     private ComponentType<EntityStore, MangekyouSharingan> mangekyouSharingan;
+    private ComponentType<EntityStore, HakkeKushoComponent> hakkeKushi;
 
     public Main(@Nonnull JavaPluginInit init) {
         super(init);
@@ -95,9 +97,7 @@ public class Main extends JavaPlugin {
         AssetRegistry.register(builder.build());
 
         // 3. Registro da Interaction customizada (combo de jutsu, via sistema nativo)
-        this.getCodecRegistry(Interaction.CODEC)
-                .register("JutsuCombo", JutsuComboInteraction.class, JutsuComboInteraction.CODEC);
-
+        RegisterInteractions();
         // 4. Registro de Comandos, Listeners e ECS Systems
         RegisterComponent();
         RegisterListener();
@@ -124,6 +124,13 @@ public class Main extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new DamageTrackingSystem(this.lastAttackers));
         this.getEntityStoreRegistry().registerSystem(new DeathDetectionSystem(this.lastAttackers, this.deathMarkerType));
         this.getEntityStoreRegistry().registerSystem(new WaterWalkingSystem(this.waterWalk));
+        this.getEntityStoreRegistry().registerSystem(new HiraishinParticleSystem());
+    }
+
+    public void RegisterInteractions(){
+        this.getCodecRegistry(Interaction.CODEC)
+                .register("JutsuCombo", JutsuComboInteraction.class, JutsuComboInteraction.CODEC)
+                .register("KunaiHit", KunaiHitInteraction.class, KunaiHitInteraction.CODEC);
     }
 
     public void RegisterListener() {
@@ -137,6 +144,7 @@ public class Main extends JavaPlugin {
         this.byakugan = this.getEntityStoreRegistry().registerComponent(Byakugan.class, "Byakugan", Byakugan.CODEC);
         this.sharingan = this.getEntityStoreRegistry().registerComponent(Sharingan.class, "Sharingan", Sharingan.CODEC);
         this.mangekyouSharingan = this.getEntityStoreRegistry().registerComponent(MangekyouSharingan.class, "MangekyouSharingan", MangekyouSharingan.CODEC);
+        this.hakkeKushi = this.getEntityStoreRegistry().registerComponent(HakkeKushoComponent.class, "HakkeKusho", HakkeKushoComponent.CODEC);
     }
 
     @Override
@@ -163,6 +171,7 @@ public class Main extends JavaPlugin {
     public ComponentType<EntityStore, Byakugan> getByakuganComponentType() {return this.byakugan;}
     public ComponentType<EntityStore, Sharingan> getSharinganComponentType() {return this.sharingan;}
     public ComponentType<EntityStore, MangekyouSharingan> getMangekyouSharinganComponentType() {return this.mangekyouSharingan;}
+    public ComponentType<EntityStore, HakkeKushoComponent> getHakkeKushoComponentType() { return this.hakkeKushi; }
 
     public static <T extends JsonAssetWithMap<String, DefaultAssetMap<String, T>>> Supplier<AssetStore<String, T, DefaultAssetMap<String, T>>> createAssetStore(final Class<T> clazz) {
         return new Supplier<AssetStore<String, T, DefaultAssetMap<String, T>>>() {

@@ -21,6 +21,7 @@ public class SubCommandPutMangekyou extends AbstractPlayerCommand {
     public SubCommandPutMangekyou() {
         super("mangekyou", "Alter mangekyou player.");
         this.nameArg = this.withRequiredArg("Name mangekyou. Ex: OBITO", "Name mangekyou", ArgTypes.STRING);
+        this.requireNoPermission();
     }
 
     @Override

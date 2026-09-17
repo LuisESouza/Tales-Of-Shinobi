@@ -21,6 +21,7 @@ public class SubCommandAddPoints extends AbstractPlayerCommand {
     public SubCommandAddPoints() {
         super("addpoint", "Adds attribute points to the player.");
         this.amountArg = this.withRequiredArg("amount", "Amount of points", ArgTypes.INTEGER);
+        this.requireNoPermission();
     }
 
     @Override

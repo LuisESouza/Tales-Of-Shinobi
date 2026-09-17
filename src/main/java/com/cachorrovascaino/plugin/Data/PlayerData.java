@@ -1,11 +1,9 @@
 package com.cachorrovascaino.plugin.Data;
 
 import com.cachorrovascaino.plugin.Data.Clan.ClanType;
+import org.joml.Vector3d;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerData {
 
@@ -15,6 +13,37 @@ public class PlayerData {
         SHARINGAN,
         MANGEKYO,
         BYAKUGAN
+    }
+
+    private static final int MAX_HIRAISHIN_MARKS = 5;
+    private final LinkedList<Vector3d> hiraishinMarks = new LinkedList<>();
+
+    /**
+     * Adiciona uma nova marca ao Hiraishin.
+     * Mantém sempre no máximo 5 posições ativas.
+     * Ao adicionar a 6ª, a 1ª (mais antiga) é removida para dar lugar à nova.
+     */
+    public synchronized void addHiraishinMark(Vector3d newMark) {
+        if (hiraishinMarks.size() >= MAX_HIRAISHIN_MARKS) {
+            hiraishinMarks.removeFirst();
+        }
+        hiraishinMarks.addLast(newMark);
+    }
+
+    public synchronized List<Vector3d> getHiraishinMarks() {
+        return new ArrayList<>(hiraishinMarks);
+    }
+
+    public synchronized Vector3d getLatestHiraishinMark() {
+        return hiraishinMarks.peekLast();
+    }
+
+    public synchronized boolean removeHiraishinMark(Vector3d mark) {
+        return hiraishinMarks.remove(mark);
+    }
+
+    public synchronized void clearHiraishinMarks() {
+        hiraishinMarks.clear();
     }
 
     private String name;

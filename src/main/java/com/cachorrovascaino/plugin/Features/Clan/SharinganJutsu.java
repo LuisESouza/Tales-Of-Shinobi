@@ -10,9 +10,11 @@ import com.cachorrovascaino.plugin.Utils.WeatherUtils;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
@@ -84,6 +86,7 @@ public class SharinganJutsu implements ClanJutsu {
                 WeatherUtils.applyPlayerWeather(playerRef, packetHandler, "Sharingan_Vision");
 
                 playerRef.sendMessage(Message.raw("Sharingan ativado!").color(Color.RED));
+                SoundUtil.playSoundEvent2dToPlayer(playerRef, "SFX_Sharingan", SoundCategory.SFX);
             }
 
             Main.getDataManager().savePlayer(playerRef.getUuid());

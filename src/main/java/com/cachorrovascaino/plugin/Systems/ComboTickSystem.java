@@ -33,14 +33,12 @@ public class ComboTickSystem extends DelayedEntitySystem<EntityStore> {
     private final JutsuManager jutsuManager;
     private final PlayerDataManager dataManager;
     private final EyesUtils eyesUtils;
-    private final WeatherUtils weatherUtils;
 
     public ComboTickSystem(JutsuManager jutsuManager, PlayerDataManager dataManager, EyesUtils eyesUtils, WeatherUtils weatherUtils) {
         super(0.1f);
         this.jutsuManager = jutsuManager;
         this.dataManager = dataManager;
         this.eyesUtils = eyesUtils;
-        this.weatherUtils = weatherUtils;
     }
 
     @Override
@@ -75,11 +73,12 @@ public class ComboTickSystem extends DelayedEntitySystem<EntityStore> {
             if (player != null) {
                 JutsuEquippedHud.show(player, playerRef);
             }
-            processDojutsuDrain(ref, playerRef, store, world);
+
+            processDojutsuDrain(ref, playerRef, store, commandBuffer, world);
         }
     }
 
-    private void processDojutsuDrain(Ref<EntityStore> playerEntityRef, PlayerRef playerRef, Store<EntityStore> store, World world) {
+    private void processDojutsuDrain(Ref<EntityStore> playerEntityRef, PlayerRef playerRef, Store<EntityStore> store, CommandBuffer<EntityStore> commandBuffer, World world) {
         PlayerData data = dataManager.getPlayerData(playerRef.getUuid());
         if (data == null) return;
 
@@ -117,10 +116,10 @@ public class ComboTickSystem extends DelayedEntitySystem<EntityStore> {
             data.setCurrentChakra(0.0f);
             jutsuManager.updateChakraHud(playerRef);
 
-            if (hasSharingan) store.removeComponent(playerEntityRef, sharinganType);
-            if (hasMangekyou) store.removeComponent(playerEntityRef, mangekyouType);
+            if (hasSharingan) commandBuffer.removeComponent(playerEntityRef, sharinganType);
+            if (hasMangekyou) commandBuffer.removeComponent(playerEntityRef, mangekyouType);
             if (hasByakugan) {
-                store.removeComponent(playerEntityRef, byakuganType);
+                commandBuffer.removeComponent(playerEntityRef, byakuganType);
                 ByakuganJutsu.INSTANCE.clearByakuganChakraScan(playerEntityRef, store);
             }
 
